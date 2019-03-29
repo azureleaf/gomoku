@@ -10,18 +10,32 @@ function Square(props) {
     </button>
   );
 }
-
+ 
 
 class Row extends React.Component {
   
 
-  render() {
+  renderSquare(i) {
     return (
-      <div> Hello</div>
-
-    )
+      <Square
+        value={this.props.squares[i]}
+        onClick={() => this.props.onClick(i)}
+      />
+    );
   }
 
+  numbers = [6, 7, 8]
+
+  render() {
+    return (
+      <div className="board-row">
+        {this.numbers.map(number =>
+          <span key={number.toString()}>
+            {this.renderSquare(number)}
+          </span>)}
+      </div>
+    )
+  }
 }
 
 class Board extends React.Component {
@@ -34,10 +48,20 @@ class Board extends React.Component {
     );
   }
 
+  renderArray(boardSize) {
+    var arr = new Array(boardSize * boardSize);
+
+    for (var i = 0; i < arr.length; i++) {
+      arr[i] = i;
+
+      // if (i % boardsize == 0) { }
+    }
+
+    console.log(arr);
+  }
 
 
   numbers = [3, 4, 5];
-
 
   render() {
     return (
@@ -51,11 +75,11 @@ class Board extends React.Component {
           {this.numbers.map(number => <span key={number.toString()}>{this.renderSquare(number)}</span>)}
         </div>
         <div className="board-row">
+          {/* <Row /> */}
           {this.renderSquare(6)}
           {this.renderSquare(7)}
           {this.renderSquare(8)}
         </div>
-        <Row />
       </div>
     );
   }
@@ -67,6 +91,7 @@ class Game extends React.Component {
     this.state = {
       history: [
         {
+          // Board size is hardcoded here
           squares: Array(9).fill(null)
         }
       ],
@@ -76,13 +101,23 @@ class Game extends React.Component {
   }
 
   handleClick(i) {
+    // What is this "slice()" for???
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
+
+    // When winner is determined, or
+    // when squares[i] already has value (that is, that cell is not vacant),
+    // don't change the state and just ignore the click event
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
+
+    // If it's "x"'s turn, fill with X
+    // If not, fill with O
     squares[i] = this.state.xIsNext ? "X" : "O";
+
+
     this.setState({
       history: history.concat([
         {
@@ -97,6 +132,8 @@ class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
+
+      // This is a bit tricky but concise
       xIsNext: (step % 2) === 0
     });
   }
@@ -106,11 +143,24 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
+    console.log("History:", history);
+
+    // Here let's review the structure of "history"
+    // "History" is the array of associative arrays.
+    //    An associative array represents a scene
+    // And an associative array has only one key:value pair
+    //    The key is always "squares"
+    //    The value is an array.
+    //    Every element in the array represent each square of the board
     const moves = history.map((step, move) => {
+      // "move" is integer, however it is converted to string implicitly when "+" operator is applied
       const desc = move ?
         '場面 #' + move :
         '開始時場面';
+
+      // "ul" is not defined anywhere, but somehow it works 
       return (
+        // "add key to repetitive components" rule
         <li key={move}>
           <button onClick={() => this.jumpTo(move)}>{desc}</button>
         </li>
@@ -126,7 +176,7 @@ class Game extends React.Component {
 
     return (
       <div>
-        <h1>三目並べ</h1>
+        <h1>Tic Tac Toe</h1>
 
         <div className="game">
           <div className="game-board">
