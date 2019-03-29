@@ -13,10 +13,7 @@ function Square(props) {
 
 
 class Row extends React.Component {
-  constructor(props) {
-    super.props(props);
-  }
-
+  
 
   render() {
     return (
