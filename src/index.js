@@ -1,98 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import Board from './Board';
 import * as serviceWorker from './serviceWorker';
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
- 
-
-class Row extends React.Component {
-  
-
-  renderSquare(i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
-  }
-
-  numbers = [6, 7, 8]
-
-  render() {
-    return (
-      <div className="board-row">
-        {this.numbers.map(number =>
-          <span key={number.toString()}>
-            {this.renderSquare(number)}
-          </span>)}
-      </div>
-    )
-  }
-}
-
-class Board extends React.Component {
-  renderSquare(i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
-  }
-
-  renderArray(boardSize) {
-    var arr = new Array(boardSize * boardSize);
-
-    for (var i = 0; i < arr.length; i++) {
-      arr[i] = i;
-
-      // if (i % boardsize == 0) { }
-    }
-
-    console.log(arr);
-  }
-
-
-  numbers = [3, 4, 5];
-
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.numbers.map(number => <span key={number.toString()}>{this.renderSquare(number)}</span>)}
-        </div>
-        <div className="board-row">
-          {/* <Row /> */}
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
-}
 
 class Game extends React.Component {
   constructor(props) {
     super(props);
+    this.boardSize = 4;
     this.state = {
       history: [
         {
-          // Board size is hardcoded here
-          squares: Array(9).fill(null)
+          squares: Array(this.boardSize * this.boardSize).fill(null)
         }
       ],
       stepNumber: 0,
@@ -100,20 +20,33 @@ class Game extends React.Component {
     };
   }
 
+
+  /**
+   * 
+   * State is updated in 2 situations:
+   *  When user clicked the square for new move 
+   *  When user clicked the button to reproduce the past scene
+   * 
+   * @param {int} i 
+   *    number 
+   */
   handleClick(i) {
-    // What is this "slice()" for???
+    // What is this slice() for???
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
+
+    // Again, what is this "slice()" for???
+
     const squares = current.squares.slice();
 
-    // When winner is determined, or
-    // when squares[i] already has value (that is, that cell is not vacant),
-    // don't change the state and just ignore the click event
+    // Don't change the state and just ignore the click event:
+    //    when winner is determined, or
+    //    when squares[i] already has value
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
 
-    // If it's "x"'s turn, fill with X
+    // If it's X's turn, fill with X
     // If not, fill with O
     squares[i] = this.state.xIsNext ? "X" : "O";
 
@@ -121,6 +54,7 @@ class Game extends React.Component {
     this.setState({
       history: history.concat([
         {
+          // I think using the identical names like below are quite confusing
           squares: squares
         }
       ]),
@@ -129,6 +63,10 @@ class Game extends React.Component {
     });
   }
 
+  /**
+   * 
+   * @param {int} step 
+   */
   jumpTo(step) {
     this.setState({
       stepNumber: step,
@@ -139,6 +77,9 @@ class Game extends React.Component {
   }
 
   render() {
+    // Notice that you can write codes inside render() scope
+    // other than "return(JSX)".
+
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
@@ -167,6 +108,9 @@ class Game extends React.Component {
       );
     });
 
+    // You don't have to write as "this.status",
+    // maybe because "this" is necessary only when 
+    // it refers to elements which is outside this method scope
     let status;
     if (winner) {
       status = winner + "の勝ち";
@@ -174,6 +118,9 @@ class Game extends React.Component {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
+    // How does they identify which square was clicked?
+    // At this "Game" class level, it's not determined which square was clicked.
+    // Click on anywhere in Board DOM element triggers event handler
     return (
       <div>
         <h1>Tic Tac Toe</h1>
@@ -181,6 +128,7 @@ class Game extends React.Component {
         <div className="game">
           <div className="game-board">
             <Board
+              boardSize={this.boardSize}
               squares={current.squares}
               onClick={i => this.handleClick(i)}
             />
@@ -199,6 +147,7 @@ class Game extends React.Component {
 
 ReactDOM.render(<Game />, document.getElementById("root"));
 
+// This hard-coded "lines" should be modified into flexible one
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
