@@ -1,5 +1,5 @@
 import React from 'react';
-// import Square from './Square'
+import Square from './Square'
 
 
 /**
@@ -14,13 +14,13 @@ import React from 'react';
  *    button element to reproduce past scene
  */
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
+// function Square(props) {
+//   return (
+//     <button className="square" onClick={props.onClick}>
+//       {props.value}
+//     </button>
+//   );
+// }
 
 
 
