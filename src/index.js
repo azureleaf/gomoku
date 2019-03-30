@@ -8,7 +8,8 @@ import * as serviceWorker from './serviceWorker';
 class Game extends React.Component {
   constructor(props) {
     super(props);
-    this.boardSize = 4;
+    this.boardSize = 15;
+    this.winnerChainLength = 5;
     this.state = {
       history: [
         {
@@ -33,16 +34,16 @@ class Game extends React.Component {
   handleClick(i) {
     // What is this slice() for???
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
+
     const current = history[history.length - 1];
 
     // Again, what is this "slice()" for???
-
     const squares = current.squares.slice();
 
     // Don't change the state and just ignore the click event:
     //    when winner is determined, or
     //    when squares[i] already has value
-    if (calculateWinner(squares) || squares[i]) {
+    if (findWinner(squares, this.boardSize, this.winnerChainLength) || squares[i]) {
       return;
     }
 
@@ -82,9 +83,8 @@ class Game extends React.Component {
 
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
+    const winner = findWinner(current.squares, this.boardSize, this.winnerChainLength)
 
-    console.log("History:", history);
 
     // Here let's review the structure of "history"
     // "History" is the array of associative arrays.
@@ -113,7 +113,7 @@ class Game extends React.Component {
     // it refers to elements which is outside this method scope
     let status;
     if (winner) {
-      status = winner + "の勝ち";
+      status = winner + "の勝ち！";
     } else {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
@@ -123,8 +123,7 @@ class Game extends React.Component {
     // Click on anywhere in Board DOM element triggers event handler
     return (
       <div>
-        <h1>Tic Tac Toe</h1>
-
+        <h1>五目並べ</h1>
         <div className="game">
           <div className="game-board">
             <Board
@@ -147,27 +146,156 @@ class Game extends React.Component {
 
 ReactDOM.render(<Game />, document.getElementById("root"));
 
-// This hard-coded "lines" should be modified into flexible one
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
 
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+
+function findWinner(squares, boardSize, winnerChainLength) {
+
+  var matrix = convertTo2D(squares);
+
+  // Results of winner check
+  // Each element represents for the check of a line
+
+  for (var i = 0; i < boardSize; i++) {
+    var results = [];
+
+    results.push(countChain(
+      scanLine(matrix, { x: i, y: 0 }, "R")
+    ))
+    results.push(countChain(
+      scanLine(matrix, { x: 0, y: i }, "D")
+    ))
+    results.push(countChain(
+      scanLine(matrix, { x: i, y: 0 }, "DR")
+    ))
+    results.push(countChain(
+      scanLine(matrix, { x: 0, y: i }, "DR")
+    ))
+    results.push(countChain(
+      scanLine(matrix, { x: i, y: 0 }, "UR")
+    ))
+    results.push(countChain(
+      scanLine(matrix, { x: boardSize - 1, y: i }, "UR")
+    ))
+
+    for (var j = 0; j < results.length; j++) {
+      if (results[j] != null) return results[j];
     }
   }
-  return null;
 
+
+  /**
+   * Convert array[boardSize*boardSize] into array[boardSize][boardSize]
+   * 
+   * @param {Array.<string|null>} arr 
+   * @return {Array.<Array.<string|null>>}
+   */
+  function convertTo2D(arr) {
+    var matrix = new Array(boardSize);
+    for (var i = 0; i < boardSize; i++) {
+      matrix[i] = new Array(boardSize);
+      for (var j = 0; j < boardSize; j++) {
+        matrix[i][j] = arr[i * boardSize + j];
+      }
+    }
+    return matrix;
+  }
+
+
+  /**
+   * Scan a line in the board
+   *  from the designated point
+   *  toward the designated direction
+   *  until cursor reaches the edge of the board
+   * Returns all the value found
+   * 
+   * @param {Array.<Array.<string|null>>} matrix 
+   *  Two-dimension square array in the size of boardSize*boardSize
+   * @param {object} origin 
+   *  {x: int, y: int}
+   * @param {string} direction 
+   *  "R": scan toward right
+   *  "D": scan toward down,
+   *  "DR" scan toward down & right
+   *  "UR" scan toward up   & right
+   */
+  function scanLine(matrix, origin, direction) {
+    var cursor = {
+      x: origin.x,
+      y: origin.y
+    };
+    var line = [];
+
+    while (1) {
+      line.push(matrix[cursor.x][cursor.y]);
+
+      // If cursor reaches the board edge, return the line so far
+      switch (direction) {
+        case "R":
+          if (cursor.y === boardSize - 1) return line;
+          else cursor.y++;
+          break;
+        case "D":
+          if (cursor.x === boardSize - 1) return line;
+          else cursor.x++;
+          break;
+        case "DR":
+          if (cursor.x === boardSize - 1 || cursor.y === boardSize - 1)
+            return line;
+          else {
+            cursor.x++;
+            cursor.y++;
+          }
+          break;
+        case "UR":
+          if (cursor.x === 0 || cursor.y === boardSize - 1)
+            return line;
+          else {
+            cursor.x--;
+            cursor.y++;
+          }
+          break;
+        default:
+          console.log("Error: unknown direction");
+          return null;
+      }
+    }
+  }
+
+
+  /**
+   * Returns winner if there's a completed stone chains
+   * 
+   * @param {Array.<string|null>} sequence 
+   *  sequence of a line, e.g. ["X", null, "O", "O", null]
+   * @return {string|null} 
+   *  if winner is confirmed: "O" or "X"
+   *  if not: null
+   */
+  function countChain(sequence) {
+
+    // "player" is any of "null", "O", "X"
+    var counter = {
+      player: null,
+      chainLength: 0
+    };
+
+    for (var i = 0; i < sequence.length; i++) {
+      if (counter.player === sequence[i]) {
+        counter.chainLength++;
+
+        // chain of "null" is meaningless for the game, then ignore it
+        if (counter.player !== null && counter.chainLength >= winnerChainLength) {
+          return counter.player;
+        }
+      } else {
+        counter.player = sequence[i];
+        counter.chainLength = 1;
+      }
+    }
+
+    // When no chain is completed
+    return null;
+  }
 }
 
 
