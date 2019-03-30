@@ -213,10 +213,10 @@ function findWinner(squares, boardSize, winnerChainLength) {
    * @param {object} origin 
    *  {x: int, y: int}
    * @param {string} direction 
-   *  "R": scan toward right
-   *  "D": scan toward down,
-   *  "DR" scan toward down & right
-   *  "UR" scan toward up   & right
+   *  "R"  : toward right
+   *  "D"  : toward down
+   *  "DR" : toward down & right
+   *  "UR" : toward up   & right
    */
   function scanLine(matrix, origin, direction) {
     var cursor = {
