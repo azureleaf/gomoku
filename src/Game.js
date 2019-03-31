@@ -86,7 +86,7 @@ export default class Game extends React.Component {
   render() {
 
     // Notice that you can write codes inside render() scope
-    // other than "return(JSX)".
+    // before "return(JSX)".
     const history = this.state.history;
     const current = history[this.state.stepNumber];
     const winner = findWinner(current.squares, this.boardSize, this.winnerChainLength)
@@ -267,10 +267,12 @@ function findWinner(squares, boardSize, winnerChainLength) {
    * Returns winner if there's a completed stone chains
    * 
    * @param {Array.<string|null>} sequence 
-   *  sequence of a line, e.g. ["X", null, "O", "O", null]
+   *  Sequence of a line, e.g. ["X", null, "O", "O", null, null, null]
    * @return {string|null} 
-   *  if winner is confirmed: "O" or "X"
-   *  if not: null
+   *  If winner is confirmed:
+   *    return "O" or "X"
+   *  If not:
+   *    return null
    */
   function countChain(sequence) {
 
