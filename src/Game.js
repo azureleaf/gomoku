@@ -44,10 +44,9 @@ export default class Game extends React.Component {
 
     console.log("before slice:", current.squares);
     console.log("after slice", current.squares.slice());
-    
 
-    // Don't change the state and just ignore the click event:
-    //    when winner is determined, or
+    // Not to change the state and just ignore the click event:
+    //    when winner is determined
     //    when squares[i] already has value
     if (findWinner(squares, this.boardSize, this.winnerChainLength) || squares[i]) {
       return;
