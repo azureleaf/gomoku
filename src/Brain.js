@@ -1,26 +1,28 @@
-class Brain {
+export default class Brain {
   constructor(matrix, boardSize, winnerChainLength) {
     this.matrix = matrix;
     this.boardSize = boardSize;
     this.winnerChainLength = winnerChainLength;
   }
 
-
-  generatePatterns() {
-    var patterns = new Array(Math.pow(2, this.winnerChainLength)).fill(null);
+  /**
+   *  @param {int} patternLength
+   */
+  generatePatterns(patternLength) {
+    var patterns = new Array(Math.pow(2, patternLength)).fill(null);
 
     for (var i = 0; i < patterns.length; i++) {
-      patterns[i] = returnBinaryArray(i, this.winnerChainLength);
+      patterns[i] = returnBinaryArray(i, patternLength);
     }
 
     /**
-     * Convert number into binary array
+     * Convert a number into binary array.
+     * Unused upper digit will be filled with 0.
+     *    e.g.
+     *      5 => [0, 0, 1, 0, 1]
      * @param {int} num 
      * @param {int} arrayLength
-     * @return {Array<int>}
-     * Unused upper digit will be filled with 0
-     *    e.g.
-     *      4 => [1, 0, 0, 0, 0]
+     * @return {array.<int>}
      */
     function returnBinaryArray(num, arrayLength) {
       var strBinary = num.toString(2);
@@ -30,18 +32,17 @@ class Brain {
       }
       return array;
     }
-    console.log(patterns);
+    // console.log(patterns);
   }
 
-  generatePatterns();
-
+  
   /**
   * 
   * @param {int} n 
   * @return {int} factorial of n
   */
   factorial(n) {
-    if (n != 0) return n * (n - 1);
+    if (n !== 0) return n * (n - 1);
     else return 1;
   }
 
@@ -79,10 +80,3 @@ class Brain {
   }
 
 }
-
-
-// test
-brain = new Brain(null, null, 5);
-console.log(brain.generatePatterns());
-
-export default Brain;

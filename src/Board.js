@@ -33,7 +33,7 @@ import Square from './Square'
  *    e.g. ["X", "O", null, "X", null....]
  *  @param {function} props.onClick
  */
-class Board extends React.Component {
+export default class Board extends React.Component {
 
   /**
    * @param {int} i 
@@ -96,5 +96,3 @@ class Board extends React.Component {
   }
 }
 
-
-export default Board
