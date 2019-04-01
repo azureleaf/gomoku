@@ -1,5 +1,6 @@
 import React from 'react';
 import Board from './Board'
+//import Brain from './Brain'
 
 
 export default class Game extends React.Component {
@@ -42,8 +43,8 @@ export default class Game extends React.Component {
     // When I delete "slice()" part, jumpTo() button is no longer available. why???
     const squares = current.squares.slice();
 
-    console.log("before slice:", current.squares);
-    console.log("after slice", current.squares.slice());
+    // console.log("before slice:", current.squares);
+    // console.log("after slice", current.squares.slice());
 
     // Not to change the state and just ignore the click event:
     //    when winner is determined
@@ -123,6 +124,9 @@ export default class Game extends React.Component {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
+    // Test to use Brain class
+    // var brain = new Brain();
+    
     // At this "Game" class level, it's not determined which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
     return (
@@ -298,38 +302,4 @@ function findWinner(squares, boardSize, winnerChainLength) {
     // When no chain is completed
     return null;
   }
-}
-
-
-function nextMove(squares){
-  /*
-    array: candidates[][]
-    associative array: patternTable
-      "x1111": 100,
-      "1x111": 100,
-      "11x11": 100,
-      "0x1110": 100,
-      "011x10": 100,
-      "0x111": 70
-      "001x00": 5
-      "0010x0": 3
-      "00100x0": 2
-
-    for: all lines{
-      scan a line
-      give score for "O" to every blank in the line
-      give score for "X" to every blank in the line
-    }
-
-    sum up all the scores for every cell in the board
-      coefficient for "advantage score" & "disturbance score" must be elaborated
-      direction of the line must be considered (because some candidates is easier to deceive human opponent)
-      when score is identical for several moves, decide with random number
-    pick the move with the highest score
-
-    machine learning: if that move was killed by human opponent followingly, reduce the pattern score
-
-
-  */
-
 }
