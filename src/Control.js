@@ -1,4 +1,6 @@
 import React from 'react'
+// import {Button, ButtonToolbar, Form} from 'react-bootstrap';
+
 
 export default class Control extends React.Component {
   constructor(){
@@ -8,18 +10,30 @@ export default class Control extends React.Component {
       isComSecond: true
     }
   }
+
+  // THIS PART IS NOT COMPLETED
+  handleClick(){
+    this.setState({
+      isComFirst: !this.state.isComFirst
+    });
+
+    console.log("clicked!");
+  }
+
   render() {
     return (
+
       <div className="radioButton">
-        
         <form>
-        先手：
+        
+        先手: 
           <label>
             <input
               type="radio"
               name="playerOrder"
-              value="opetion1"
+              value="option1"
               checked={!this.state.isComFirst}
+              onClick=""
             />Human
           </label>
           <label>
@@ -28,17 +42,20 @@ export default class Control extends React.Component {
               name="playerOrder"
               value="option1"
               checked={this.state.isComFirst}
+              onClick=""
             />Com
           </label>
+      
         </form>
         <form>
-        後手：
+        後手: 
           <label>
             <input
               type="radio"
               name="playerOrder"
               value="Human"
               checked={!this.state.isComSecond}
+              onClick=""
             />Human
           </label>
           <label>
@@ -47,15 +64,16 @@ export default class Control extends React.Component {
               name="playerOrder"
               value="com"
               checked={this.state.isComSecond}
+              onClick=""
             />Com
           </label>
-        </form>
           <div>
-            候補手評価値表示：<input type="checkbox" id="myCheck" onclick=""></input>
+            候補手評価値表示：<input type="checkbox" id="myCheck" onClick=""></input>
           </div>
           <div>
-            <input type="button" value="保存"/>
+            <button type="submit" value="SaveSetting">設定保存</button>
           </div>
+          </form>
       </div>
     )
   }

@@ -19,7 +19,7 @@ export default function findWinner(squares, boardSize, winnerChainLength, lastMo
     const x = Math.floor(lastMove / boardSize);
     const y = lastMove % boardSize;
 
-    console.log("point:", x, y);
+    // console.log("point:", x, y);
 
   }
 

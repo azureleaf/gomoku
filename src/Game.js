@@ -4,6 +4,7 @@ import Brain from './Brain'
 import findWinner from './findWinner'
 import Control from './Control'
 
+
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
@@ -161,7 +162,7 @@ export default class Game extends React.Component {
             />
           </div>
           <div className="game-info">
-            <h1>GOMOKU</h1>
+            <h1>Gomoku</h1>
             <Control />
             <h2>{status}</h2>
             <ol>{scenes}</ol>

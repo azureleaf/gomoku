@@ -7,6 +7,9 @@ export default class Brain {
 
   /**
    *  @param {int} patternLength
+   *    Length of a pattern to check
+   *  @return {Array.<Array.<int>}
+   *    Patterns list. A element represents for a pattern.
    */
   generatePatterns(patternLength) {
     var patterns = new Array(Math.pow(2, patternLength)).fill(null);
@@ -15,27 +18,40 @@ export default class Brain {
       patterns[i] = returnBinaryArray(i, patternLength);
     }
 
+
     /**
      * Convert a number into binary array.
      * Unused upper digit will be filled with 0.
      *    e.g.
      *      5 => [0, 0, 1, 0, 1]
      * @param {int} num 
+     *    Decimal number to be converted to binary number
      * @param {int} arrayLength
+     *    Length of the array to be returned
      * @return {array.<int>}
+     *    Array of the binary number with blank digits filled with 0
      */
     function returnBinaryArray(num, arrayLength) {
       var strBinary = num.toString(2);
+      const strBinaryLength = strBinary.length;
+
+      // Fill zero to the blank digit
+      for (let i = 0; i < arrayLength - strBinaryLength; i++) {
+        strBinary = "0" + strBinary;
+      }
+
+      // Array to return
       var array = new Array(arrayLength).fill(0);
-      for (var i = 0; i < strBinary.length; i++) {
+
+      for (let i = 0; i < arrayLength; i++) {
         array[i] = Number(strBinary[i]);
       }
+
       return array;
     }
-    // console.log(patterns);
   }
 
-  
+
   /**
   * 
   * @param {int} n 
