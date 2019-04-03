@@ -3,16 +3,16 @@ import React from 'react'
 
 
 export default class Control extends React.Component {
-  constructor(){
+  constructor() {
     super();
-    this.state ={
+    this.state = {
       isComFirst: false,
       isComSecond: true
     }
   }
 
   // THIS PART IS NOT COMPLETED AT ALL
-  handleClick(){
+  handleClick() {
     this.setState({
       isComFirst: !this.state.isComFirst
     });
@@ -24,9 +24,9 @@ export default class Control extends React.Component {
     return (
 
       <div className="radioButton">
-        <form>
-        
-        先手: 
+        {/* <form>
+
+          先手:
           <label>
             <input
               type="radio"
@@ -45,10 +45,10 @@ export default class Control extends React.Component {
               onClick=""
             />Com
           </label>
-      
+
         </form>
         <form>
-        後手: 
+          後手:
           <label>
             <input
               type="radio"
@@ -67,13 +67,17 @@ export default class Control extends React.Component {
               onClick=""
             />Com
           </label>
+        </form> */}
+        {/* <form>
           <div>
             候補手評価値表示：<input type="checkbox" id="myCheck" onClick=""></input>
           </div>
+        </form> */}
+        <form>
           <div>
             <button type="submit" value="SaveSetting">設定保存</button>
           </div>
-          </form>
+        </form>
       </div>
     )
   }

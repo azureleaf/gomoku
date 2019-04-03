@@ -3,19 +3,66 @@ export default class Brain {
     this.matrix = matrix;
     this.boardSize = boardSize;
     this.winnerChainLength = winnerChainLength;
+
+    // Copy multidimensional array
+    this.scoreMatrix = matrix.map(arr => { return [...arr] });
+
+    this.patterns = this.generatePatterns();
   }
 
-  /**
-   *  @param {int} patternLength
-   *    Length of a pattern to check
-   *  @return {Array.<Array.<int>}
-   *    Patterns list. A element represents for a pattern.
-   */
-  generatePatterns(patternLength) {
-    var patterns = new Array(Math.pow(2, patternLength)).fill(null);
 
+  /**
+   *  @param {int} winnerChainLength
+   *    Length of a pattern to check.
+   *  @return {Array.<Object>}
+   *    Patterns list. Each row represents for a pattern.
+   *    e.g.
+   *      [
+   *        {pattern: [0,0,1,0,1], score: [100,100,0,100,0]},
+   *        {pattern: [0,1,1,1,0], score: [1000,0,0,0,1000]},
+   *        ...
+   *      ]
+   */
+  generatePatterns() {
+
+    /**
+     *  main
+     */
+    let patterns = new Array(Math.pow(2, this.winnerChainLength)).fill(null);
     for (var i = 0; i < patterns.length; i++) {
-      patterns[i] = returnBinaryArray(i, patternLength);
+      var pat = returnBinaryArray(i, this.winnerChainLength);
+      patterns[i] = {
+        pattern: [...pat],
+        score: generatePattern(pat)
+      };
+    }
+    return patterns;
+
+    /**
+     * Convert pattern array into 
+     * 
+     * @param {Array.<int>} array
+     *  1: Position of the stones
+     *  0: Empty 
+     * @return {Array.<int>}
+     * 
+     * e.g. 
+     *  [1, 0, 0, 1, 0, 0] => [0, 100, 100, 0, 100, 100]
+     */
+    function generatePattern(array) {
+
+      let stoneCounter = 0;
+
+      // Sum the number of stones in the pattern
+      for (let i = 0; i < array.length; i++) stoneCounter += array[i];
+
+      // Convert position pattern into evaluation pattern
+      for (let i = 0; i < array.length; i++) {
+        if (array[i] === 0) array[i] = Math.pow(10, stoneCounter);
+        else if (array[i] === 1) array[i] = 0;
+        else console.log("Error: unknown symbol in the pattern!");
+      }
+      return array;
     }
 
 
@@ -28,7 +75,7 @@ export default class Brain {
      *    Decimal number to be converted to binary number
      * @param {int} arrayLength
      *    Length of the array to be returned
-     * @return {array.<int>}
+     * @return {Array.<int>}
      *    Array of the binary number with blank digits filled with 0
      */
     function returnBinaryArray(num, arrayLength) {
@@ -61,6 +108,38 @@ export default class Brain {
     if (n !== 0) return n * (n - 1);
     else return 1;
   }
+
+
+  /**
+   * 
+   * @param {Array.<string|null>} arrayRaw 
+   *    This array is going to be tested if it has a matching pattern
+   * @param {string} symbol
+   *    "O" or "X"
+   *    To determine for which player this function is going to calculate the score
+   */
+  matchPattern(arrayRaw, symbol) {
+
+    // Convert array format
+    // e.g. array = ["X", "X", null, "O"]
+    //  When symbol is "X", array turns into [   1,    1, 0, null]
+    //  When symbol is "O", array turns into [null, null, 0,    1]
+    let array = arrayRaw.map(element => {
+      switch (element) {
+        case symbol: return 1;
+        case null: return 0;
+        default: return null;
+      }
+    })
+
+
+    for (let origin = 0; origin < array.length - this.winnerChainLength; origin++) {
+      for (let patternIndex = 0; patternIndex < this.patterns.length; patternIndex++) {
+        if (array[origin] == null && this.patterns.pattern[patternIndex] === 1) return;
+      }
+    }
+  }
+
 
   nextMove(squares) {
     /*

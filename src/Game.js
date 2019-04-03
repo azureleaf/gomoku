@@ -144,16 +144,21 @@ export default class Game extends React.Component {
     }
 
     // Test to use Brain class
-    var brain = new Brain(0, 0, 5);
-    brain.generatePatterns(5);
+    let testMatrix = [
+      [null, "O", "O", null, null],
+      [null, "X", null, null, null],
+      [null, "X", null, "O", null],
+      [null, "O", "O", "X", null],
+      [null, null, "O", null, null],
+    ];
+    var brain = new Brain(testMatrix, this.boardSize, this.winnerChainLength);
+    console.log(brain.patterns)
 
     // At this "Game" class level, it's not determined which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
     return (
       <div>
-
         <div className="game">
-
           <div className="game-board">
             <Board
               boardSize={this.boardSize}
@@ -168,7 +173,6 @@ export default class Game extends React.Component {
             <ol>{scenes}</ol>
           </div>
         </div>
-
       </div>
     );
   }
