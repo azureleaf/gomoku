@@ -7,95 +7,128 @@ export default class Brain {
     // Copy multidimensional array
     this.scoreMatrix = matrix.map(arr => { return [...arr] });
 
-    this.patterns = this.generatePatterns();
+    this.patterns = this.setPatterns();
   }
 
 
   /**
-   *  @param {int} winnerChainLength
-   *    Length of a pattern to check.
+   *  Set all initial stone patterns to the class property.
+   * 
    *  @return {Array.<Object>}
    *    Patterns list. Each row represents for a pattern.
    *    e.g.
    *      [
-   *        {pattern: [0,0,1,0,1], score: [100,100,0,100,0]},
-   *        {pattern: [0,1,1,1,0], score: [1000,0,0,0,1000]},
+   *        {pattern: [0,0,1,0,1], score: [100,100,0,100,0], max: 100},
+   *        {pattern: [0,1,1,1,0], score: [1000,0,0,0,1000], max: 1000},
    *        ...
    *      ]
    */
-  generatePatterns() {
-
-    /**
-     *  main
-     */
+  setPatterns() {
     let patterns = new Array(Math.pow(2, this.winnerChainLength)).fill(null);
-    for (var i = 0; i < patterns.length; i++) {
-      var pat = returnBinaryArray(i, this.winnerChainLength);
-      patterns[i] = {
-        pattern: [...pat],
-        score: generatePattern(pat)
+    for (let i = 0; i < patterns.length; i++) {
+      let patternArr = this.returnBinaryArray(i, this.winnerChainLength);
+      let scoreArr = this.returnScoreArray([...patternArr]);
+
+      // Put largest (like [1,1,1,1,1]) pattern first to reduce matching iteration
+      // Avoid to use Array.reverse(), it's way too slow
+      patterns[patterns.length - i - 1] = {
+        pattern: [...patternArr],
+        score: [...scoreArr],
+        max: this.getMax(scoreArr)
       };
     }
-    return patterns;
 
-    /**
-     * Convert pattern array into 
-     * 
-     * @param {Array.<int>} array
-     *  1: Position of the stones
-     *  0: Empty 
-     * @return {Array.<int>}
-     * 
-     * e.g. 
-     *  [1, 0, 0, 1, 0, 0] => [0, 100, 100, 0, 100, 100]
-     */
-    function generatePattern(array) {
+    // Sort patterns to avoid unnecessary matching
+    // e.g.
+    // When [11010] matches, try matching to [10000], [11000], etc. is redundant
+    // Therefore, put [11010] prior to [10000], [11000] etc., 
+    // and when [11010] is matched, abort matching to latter patterns .
+    return this.sortPatterns(patterns);
+  }
 
-      let stoneCounter = 0;
 
-      // Sum the number of stones in the pattern
-      for (let i = 0; i < array.length; i++) stoneCounter += array[i];
+  /**
+   * Convert position array into score array, then returns it
+   * 
+   * @param {Array.<int>} array
+   *  1: Position of the stones
+   *  0: Empty 
+   * @return {Array.<int>}
+   * 
+   * e.g. 
+   *  [1, 0, 0, 1, 0, 0] => [0, 100, 100, 0, 100, 100]
+   *  High score means recommended position to put stone in the next move
+   */
+  returnScoreArray(array) {
+    let stoneCounter = 0;
 
-      // Convert position pattern into evaluation pattern
-      for (let i = 0; i < array.length; i++) {
-        if (array[i] === 0) array[i] = Math.pow(10, stoneCounter);
-        else if (array[i] === 1) array[i] = 0;
-        else console.log("Error: unknown symbol in the pattern!");
-      }
-      return array;
+    // Sum the number of stones included in the pattern
+    for (let i = 0; i < array.length; i++) stoneCounter += array[i];
+
+    // Convert position pattern into evaluation pattern
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] === 0) array[i] = Math.pow(10, stoneCounter);
+      else if (array[i] === 1) array[i] = 0;
+      else console.log("Error: unknown symbol in the pattern!");
+    }
+    return array;
+  }
+
+
+  /***
+   * Sort pattern by the key "max"
+   * 
+   * @param {Array.<Object>} array
+   *  Array must be in the format of "this.patterns"
+   */
+  sortPatterns(array) {
+    return array.sort((a, b) => { return b.max - a.max; });
+  }
+
+
+  /**
+   * Convert a decimal number into binary array.
+   * 
+   * @param {int} num 
+   *    Decimal number to be converted to binary number
+   * @param {int} arrayLength
+   *    Length of the array to be returned
+   * @return {Array.<int>}
+   *    Array of the binary number with blank digits filled with 0
+   * 
+   * Unused upper digit will be filled with 0.
+   *    e.g.
+   *      5 => [0, 0, 1, 0, 1]
+   */
+  returnBinaryArray(num, arrayLength) {
+    var strBinary = num.toString(2);
+    const strBinaryLength = strBinary.length;
+
+    // Fill zero to the blank digit
+    for (let i = 0; i < arrayLength - strBinaryLength; i++) {
+      strBinary = "0" + strBinary;
     }
 
-
-    /**
-     * Convert a number into binary array.
-     * Unused upper digit will be filled with 0.
-     *    e.g.
-     *      5 => [0, 0, 1, 0, 1]
-     * @param {int} num 
-     *    Decimal number to be converted to binary number
-     * @param {int} arrayLength
-     *    Length of the array to be returned
-     * @return {Array.<int>}
-     *    Array of the binary number with blank digits filled with 0
-     */
-    function returnBinaryArray(num, arrayLength) {
-      var strBinary = num.toString(2);
-      const strBinaryLength = strBinary.length;
-
-      // Fill zero to the blank digit
-      for (let i = 0; i < arrayLength - strBinaryLength; i++) {
-        strBinary = "0" + strBinary;
-      }
-
-      // Array to return
-      var array = new Array(arrayLength).fill(0);
-
-      for (let i = 0; i < arrayLength; i++) {
-        array[i] = Number(strBinary[i]);
-      }
-
-      return array;
+    // Define temporary array to return
+    var array = new Array(arrayLength).fill(0);
+    for (let i = 0; i < arrayLength; i++) {
+      array[i] = Number(strBinary[i]);
     }
+    return array;
+  }
+
+
+  /**
+   * Get a number array, return the largest value in it
+   * 
+   * @param {Array.<int>} array 
+   */
+  getMax(array) {
+    let max = 0;
+    for (let i = 0; i < array.length; i++) {
+      if (array[i] > max) max = array[i];
+    }
+    return max;
   }
 
 
@@ -117,13 +150,25 @@ export default class Brain {
    * @param {string} symbol
    *    "O" or "X"
    *    To determine for which player this function is going to calculate the score
+   * @return {void}
    */
   matchPattern(arrayRaw, symbol) {
+    // Sample patterns[0] to get the length of a pattern
+    //   assumption: every pattern has the same length 
+    const patLen = this.patterns[0].pattern.length;
 
-    // Convert array format
-    // e.g. array = ["X", "X", null, "O"]
-    //  When symbol is "X", array turns into [   1,    1, 0, null]
-    //  When symbol is "O", array turns into [null, null, 0,    1]
+    // When input array is shorter than template patterns, 
+    //   no pattern can be matched, therefore abort the process
+    if (arrayRaw.length < patLen) {
+      console.log("Error: input array is shorter than template patterns.")
+      return null;
+    }
+
+    // Convert array format to the one which is compatible with pattern array
+    // 
+    // e.g. arrayRa w = ["X", "X", null, "O"]
+    //  When symbol is "X", this array turns into [   1,    1, 0, null]
+    //  When symbol is "O", this array turns into [null, null, 0,    1]
     let array = arrayRaw.map(element => {
       switch (element) {
         case symbol: return 1;
@@ -132,12 +177,29 @@ export default class Brain {
       }
     })
 
+    // Move the start position of matching one by one
+    for (let cursor = 0; cursor < array.length - this.winnerChainLength; cursor++) {
 
-    for (let origin = 0; origin < array.length - this.winnerChainLength; origin++) {
-      for (let patternIndex = 0; patternIndex < this.patterns.length; patternIndex++) {
-        if (array[origin] == null && this.patterns.pattern[patternIndex] === 1) return;
+      // Match every pattern to the array
+      for (let patIndex = 0; patIndex < this.patterns.length; patIndex++) {
+
+        for (let patCursor = 0; patCursor < patLen; patCursor++) {
+          // If discrepancy is found, abort matching the pattern
+          if (array[cursor] !== this.patterns[patIndex].pattern[patCursor]) {
+            console.log("aborted");
+            break;
+          };
+
+          // If reached the end of pattern
+          if (patCursor === patLen - 1) {
+            return "matched! pattern: " + this.patterns[patIndex].pattern + " at position of " + cursor;
+          }
+        }
       }
     }
+
+    // If no match found (this is unlikely)
+    return null;
   }
 
 
@@ -172,6 +234,7 @@ export default class Brain {
    
     */
 
+    return 0;
   }
 
 }

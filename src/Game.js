@@ -143,7 +143,7 @@ export default class Game extends React.Component {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
-    // Test to use Brain class
+    // Test Brain class
     let testMatrix = [
       [null, "O", "O", null, null],
       [null, "X", null, null, null],
@@ -152,7 +152,8 @@ export default class Game extends React.Component {
       [null, null, "O", null, null],
     ];
     var brain = new Brain(testMatrix, this.boardSize, this.winnerChainLength);
-    console.log(brain.patterns)
+    console.log(brain.patterns);
+    console.log(brain.matchPattern([null, null, null, null, "O", "O",], "O"));
 
     // At this "Game" class level, it's not determined which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
