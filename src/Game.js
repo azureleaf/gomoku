@@ -144,7 +144,7 @@ export default class Game extends React.Component {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
-    function _testBrainClass() {
+    // function _testBrainClass() {
       let testMatrix = [
         [null, "O", "O", null, null],
         [null, "X", null, null, null],
@@ -158,9 +158,11 @@ export default class Game extends React.Component {
         ["X", null, null, "O", null, "O", "O", null],
         "O")
       );
-    }
+    // }
 
-    console.log("Current:", current);
+    // _testBrainClass();
+
+    // console.log("Current:", current);
     // let brain = new Brain(current, this.boardSize, this.winnerChainLength);
 
 

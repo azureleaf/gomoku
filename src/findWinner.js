@@ -1,3 +1,5 @@
+import Brain from './Brain'
+
 /**
  * 
  * @param {Array.<int|null>} squares 
@@ -9,7 +11,7 @@
 export default function findWinner(squares, boardSize, winnerChainLength, lastMove) {
 
   // Converts array into 2D matrix for convenience
-  const matrix = convertTo2D(squares);
+  const matrix = Brain.convertTo2D(squares, boardSize);
 
   // scanModifiedLines();
   return scanAllLines();
@@ -29,17 +31,17 @@ export default function findWinner(squares, boardSize, winnerChainLength, lastMo
       let results = [];
 
       results.push(countChain(
-        scanLine(matrix, { x: i, y: 0 }, "R")))
+        Brain.scanLine(matrix, { x: i, y: 0 }, "R", boardSize)))
       results.push(countChain(
-        scanLine(matrix, { x: 0, y: i }, "D")))
+        Brain.scanLine(matrix, { x: 0, y: i }, "D", boardSize)))
       results.push(countChain(
-        scanLine(matrix, { x: i, y: 0 }, "DR")))
+        Brain.scanLine(matrix, { x: i, y: 0 }, "DR", boardSize)))
       results.push(countChain(
-        scanLine(matrix, { x: 0, y: i }, "DR")))
+        Brain.scanLine(matrix, { x: 0, y: i }, "DR", boardSize)))
       results.push(countChain(
-        scanLine(matrix, { x: i, y: 0 }, "UR")))
+        Brain.scanLine(matrix, { x: i, y: 0 }, "UR", boardSize)))
       results.push(countChain(
-        scanLine(matrix, { x: boardSize - 1, y: i }, "UR")
+        Brain.scanLine(matrix, { x: boardSize - 1, y: i }, "UR", boardSize)
       ))
 
       for (var j = 0; j < results.length; j++) {
@@ -57,16 +59,16 @@ export default function findWinner(squares, boardSize, winnerChainLength, lastMo
    * @param {Array.<string|null>} arr 
    * @return {Array.<Array.<string|null>>}
    */
-  function convertTo2D(arr) {
-    var matrix = new Array(boardSize);
-    for (var i = 0; i < boardSize; i++) {
-      matrix[i] = new Array(boardSize);
-      for (var j = 0; j < boardSize; j++) {
-        matrix[i][j] = arr[i * boardSize + j];
-      }
-    }
-    return matrix;
-  }
+  // function convertTo2D(arr) {
+  //   var matrix = new Array(boardSize);
+  //   for (var i = 0; i < boardSize; i++) {
+  //     matrix[i] = new Array(boardSize);
+  //     for (var j = 0; j < boardSize; j++) {
+  //       matrix[i][j] = arr[i * boardSize + j];
+  //     }
+  //   }
+  //   return matrix;
+  // }
 
 
   /**
@@ -88,52 +90,52 @@ export default function findWinner(squares, boardSize, winnerChainLength, lastMo
    * @return {Array.<string|null>}
    *  Extracted line
    */
-  function scanLine(matrix, origin, direction) {
-    var cursor = {
-      x: origin.x,
-      y: origin.y
-    };
-    var line = [];
+  // function scanLine(matrix, origin, direction) {
+  //   var cursor = {
+  //     x: origin.x,
+  //     y: origin.y
+  //   };
+  //   var line = [];
 
-    while (1) {
-      line.push(matrix[cursor.x][cursor.y]);
+  //   while (1) {
+  //     line.push(matrix[cursor.x][cursor.y]);
 
-      // If cursor reaches the board edge, return the line so far
-      switch (direction) {
-        case "R":
-          if (cursor.y === boardSize - 1) return line;
-          else cursor.y++;
-          break;
+  //     // If cursor reaches the board edge, return the line so far
+  //     switch (direction) {
+  //       case "R":
+  //         if (cursor.y === boardSize - 1) return line;
+  //         else cursor.y++;
+  //         break;
 
-        case "D":
-          if (cursor.x === boardSize - 1) return line;
-          else cursor.x++;
-          break;
+  //       case "D":
+  //         if (cursor.x === boardSize - 1) return line;
+  //         else cursor.x++;
+  //         break;
 
-        case "DR":
-          if (cursor.x === boardSize - 1 || cursor.y === boardSize - 1)
-            return line;
-          else {
-            cursor.x++;
-            cursor.y++;
-          }
-          break;
+  //       case "DR":
+  //         if (cursor.x === boardSize - 1 || cursor.y === boardSize - 1)
+  //           return line;
+  //         else {
+  //           cursor.x++;
+  //           cursor.y++;
+  //         }
+  //         break;
 
-        case "UR":
-          if (cursor.x === 0 || cursor.y === boardSize - 1)
-            return line;
-          else {
-            cursor.x--;
-            cursor.y++;
-          }
-          break;
+  //       case "UR":
+  //         if (cursor.x === 0 || cursor.y === boardSize - 1)
+  //           return line;
+  //         else {
+  //           cursor.x--;
+  //           cursor.y++;
+  //         }
+  //         break;
 
-        default:
-          console.log("Error: unknown direction");
-          return null;
-      }
-    }
-  }
+  //       default:
+  //         console.log("Error: unknown direction");
+  //         return null;
+  //     }
+  //   }
+  // }
 
 
   /**

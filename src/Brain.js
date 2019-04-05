@@ -251,4 +251,88 @@ export default class Brain {
     return 0;
   }
 
+  /**
+   * Convert array[boardSize*boardSize] into array[boardSize][boardSize]
+   * 
+   * @param {Array.<string|null>} arr 
+   * @return {Array.<Array.<string|null>>}
+   */
+  static convertTo2D(arr, boardSize) {
+    var matrix = new Array(boardSize);
+    for (var i = 0; i < boardSize; i++) {
+      matrix[i] = new Array(boardSize);
+      for (var j = 0; j < boardSize; j++) {
+        matrix[i][j] = arr[i * boardSize + j];
+      }
+    }
+    return matrix;
+  }
+
+
+    /**
+   * Scan a line in the board
+   *  from the designated point
+   *  toward the designated direction
+   *  until cursor reaches the edge of the board
+   * Returns all the value found
+   * 
+   * @param {Array.<Array.<string|null>>} matrix 
+   *  Two-dimension square array in the size of boardSize*boardSize
+   * @param {object} origin 
+   *  {x: int, y: int}
+   * @param {string} direction 
+   *  "R"  : toward right
+   *  "D"  : toward down
+   *  "DR" : toward down & right
+   *  "UR" : toward up   & right
+   * @return {Array.<string|null>}
+   *  Extracted line
+   */
+   static scanLine(matrix, origin, direction, boardSize) {
+    var cursor = {
+      x: origin.x,
+      y: origin.y
+    };
+    var line = [];
+
+    while (1) {
+      line.push(matrix[cursor.x][cursor.y]);
+
+      // If cursor reaches the board edge, return the line so far
+      switch (direction) {
+        case "R":
+          if (cursor.y === boardSize - 1) return line;
+          else cursor.y++;
+          break;
+
+        case "D":
+          if (cursor.x === boardSize - 1) return line;
+          else cursor.x++;
+          break;
+
+        case "DR":
+          if (cursor.x === boardSize - 1 || cursor.y === boardSize - 1)
+            return line;
+          else {
+            cursor.x++;
+            cursor.y++;
+          }
+          break;
+
+        case "UR":
+          if (cursor.x === 0 || cursor.y === boardSize - 1)
+            return line;
+          else {
+            cursor.x--;
+            cursor.y++;
+          }
+          break;
+
+        default:
+          console.log("Error: unknown direction");
+          return null;
+      }
+    }
+  }
+
 }
