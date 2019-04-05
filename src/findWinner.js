@@ -15,13 +15,12 @@ export default function findWinner(squares, boardSize, winnerChainLength, lastMo
   return scanAllLines();
   
 
-  // function scanModifiedLines(){
-  //   const x = Math.floor(lastMove / boardSize);
-  //   const y = lastMove % boardSize;
+  function scanModifiedLines(){
+    const x = Math.floor(lastMove / boardSize);
+    const y = lastMove % boardSize;
 
-  //   // console.log("point:", x, y);
-
-  // }
+    console.log("point:", x, y);
+  }
 
   function scanAllLines() {
     // Results of winner check

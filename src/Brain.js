@@ -49,6 +49,9 @@ export default class Brain {
 
   /**
    * Convert position array into score array, then returns it
+   * Each blank cell will have the same score
+   * In the future, this function will be unnecessary
+   *    Score should be updated by learning algorithm
    * 
    * @param {Array.<int>} array
    *  1: Position of the stones
@@ -119,7 +122,7 @@ export default class Brain {
 
 
   /**
-   * Get a number array, return the largest value in it
+   * Get a array of numbers, return the largest value in it
    * 
    * @param {Array.<int>} array 
    */
@@ -145,31 +148,38 @@ export default class Brain {
 
   /**
    * 
-   * @param {Array.<string|null>} arrayRaw 
+   * @param {Array.<string|null>} arrayInRaw 
    *    This array is going to be tested if it has a matching pattern
    * @param {string} symbol
    *    "O" or "X"
    *    To determine for which player this function is going to calculate the score
-   * @return {void}
+   * @return {Array.<int>}
+   *    Score array 
+   *    e.g.
+   *      input: ["X", null, null, "O", null, "O", "O", null]
+   *      output: [0, 100, 1000, 2100, 0, 0, 1000]
    */
-  matchPattern(arrayRaw, symbol) {
+  matchPattern(arrayInRaw, symbol) {
     // Sample patterns[0] to get the length of a pattern
-    //   assumption: every pattern has the same length 
+    //   Requirement: every pattern has the same length.
     const patLen = this.patterns[0].pattern.length;
 
     // When input array is shorter than template patterns, 
     //   no pattern can be matched, therefore abort the process
-    if (arrayRaw.length < patLen) {
-      console.log("Error: input array is shorter than template patterns.")
+    if (arrayInRaw.length < patLen) {
+      console.log("Error: input array is shorter than template patterns!")
       return null;
     }
 
+    // Define temporary array to return
+    let arrayOut = new Array(arrayInRaw.length).fill(0);
+
     // Convert array format to the one which is compatible with pattern array
     // 
-    // e.g. arrayRa w = ["X", "X", null, "O"]
-    //  When symbol is "X", this array turns into [   1,    1, 0, null]
-    //  When symbol is "O", this array turns into [null, null, 0,    1]
-    let array = arrayRaw.map(element => {
+    // e.g. arrayInRaw = ["X", "X", null, "O"]
+    //  When "symbol" is "X", this array turns into [   1,    1, 0, null]
+    //  When "symbol" is "O", this array turns into [null, null, 0,    1]
+    let arrayIn = arrayInRaw.map(element => {
       switch (element) {
         case symbol: return 1;
         case null: return 0;
@@ -178,28 +188,32 @@ export default class Brain {
     })
 
     // Move the start position of matching one by one
-    for (let cursor = 0; cursor < array.length - this.winnerChainLength; cursor++) {
+    // cursor: cursor which moves inside input array
+    for (let cursorIn = 0; cursorIn < arrayIn.length - this.winnerChainLength + 1; cursorIn++) {
 
       // Match every pattern to the array
+      // patIndex: ordial number in patterns
       for (let patIndex = 0; patIndex < this.patterns.length; patIndex++) {
 
-        for (let patCursor = 0; patCursor < patLen; patCursor++) {
+        for (let cursorPat = 0; cursorPat < patLen; cursorPat++) {
           // If discrepancy is found, abort matching the pattern
-          if (array[cursor] !== this.patterns[patIndex].pattern[patCursor]) {
-            console.log("aborted");
+          if (arrayIn[cursorIn + cursorPat] !== this.patterns[patIndex].pattern[cursorPat]) {
             break;
           };
 
-          // If reached the end of pattern
-          if (patCursor === patLen - 1) {
-            return "matched! pattern: " + this.patterns[patIndex].pattern + " at position of " + cursor;
+          // If reached the last cell of a pattern array
+          if (cursorPat === patLen - 1) {
+            console.log("Matched: " + this.patterns[patIndex].pattern + " at position of " + cursorIn);
+            
+            for (let i = 0; i < arrayOut.length; i++) {
+              if (this.patterns[patIndex].pattern[i] === 0)
+                arrayOut[cursorIn + i] += this.patterns[patIndex].score[i];
+            }
           }
         }
       }
     }
-
-    // If no match found (this is unlikely)
-    return null;
+    return arrayOut;
   }
 
 

@@ -69,15 +69,16 @@ export default class Game extends React.Component {
       return;
     }
 
-    // If it's X's turn, fill with X
+    // If it's X's turn, fill the clicked cell with X
     // If not, fill with O
     squares[i] = this.state.xIsNext ? "X" : "O";
+
 
 
     this.setState({
       history: history.concat([
         {
-          // I think using the identical names like below are quite confusing
+          // I feel using the identical names like below are quite confusing
           squares: squares
         }
       ]),
@@ -143,17 +144,25 @@ export default class Game extends React.Component {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
-    // Test Brain class
-    let testMatrix = [
-      [null, "O", "O", null, null],
-      [null, "X", null, null, null],
-      [null, "X", null, "O", null],
-      [null, "O", "O", "X", null],
-      [null, null, "O", null, null],
-    ];
-    var brain = new Brain(testMatrix, this.boardSize, this.winnerChainLength);
-    console.log(brain.patterns);
-    console.log(brain.matchPattern([null, null, null, null, "O", "O",], "O"));
+    function _testBrainClass() {
+      let testMatrix = [
+        [null, "O", "O", null, null],
+        [null, "X", null, null, null],
+        [null, "X", null, "O", null],
+        [null, "O", "O", "X", null],
+        [null, null, "O", null, null],
+      ];
+      var brain = new Brain(testMatrix, this.boardSize, this.winnerChainLength);
+      console.log(brain.patterns);
+      console.log(brain.matchPattern(
+        ["X", null, null, "O", null, "O", "O", null],
+        "O")
+      );
+    }
+
+    console.log("Current:", current);
+    // let brain = new Brain(current, this.boardSize, this.winnerChainLength);
+
 
     // At this "Game" class level, it's not determined which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
