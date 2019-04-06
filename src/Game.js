@@ -128,12 +128,7 @@ export default class Game extends React.Component {
     }
 
     if(this.state.stepNumber !== 0){
-      console.log(current);
-      // console.log(lastMove);
       this.brain.updateScore(current.squares, lastMove, "O");
-      console.log(this.brain.scanLine2(this.brain.returnMatrix(current.squares), {x: 2, y:0}, "R"));
-      // console.log(this.brain.matchPattern([null,null,null,null,null,null,"O", null,null,null,null], "O"));
-      // console.log(this.brain.matchPattern([null,null,"X",null,"O",null,"O", null,null,null,null], "O"));
     }
 
 

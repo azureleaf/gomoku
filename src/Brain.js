@@ -196,19 +196,18 @@ export default class Brain {
   /**
    * 
    * @param {Object} scanObj
-   *    array of {row: <int>, col: <int>, value: <str>}
+   *    array of {row: <int>, col: <int>, value: <str|null>}
    * @param {string} symbol
    *    "O" or "X"
    *    To determine for which player this function is going to calculate the score
    * @return {Array.<int>}
    *    Score array 
    *    e.g.
-   *      input: ["X", null, null, "O", null, "O", "O", null]
+   *      input: ["X", null, null, "O", null, "O", "O", null], symbol: "O"
    *      output: [0, 100, 1000, 2100, 0, 0, 1000]
    */
   matchPattern(scanObj, symbol) {
     // Sample patterns[0] to get the length of a pattern
-    // Requirement: every pattern has the same length.
     const patLen = this.patterns[0].pattern.length;
 
     // When input array is shorter than template patterns, 
@@ -217,6 +216,12 @@ export default class Brain {
       console.log("Error: input array is shorter than template patterns!")
       return null;
     }
+
+    // Real copy of object array
+    let scoreObj = scanObj.map(obj => {return Object.assign({}, obj)});
+
+   
+    console.log(scoreObj);
 
     // Define temporary array to return
     let arrayOut = new Array(scanObj.length).fill(0);
@@ -277,72 +282,7 @@ export default class Brain {
   }
 
 
-  /**
-   * Scan a line in the board
-   *  from the designated point
-   *  toward the designated direction
-   *  until cursor reaches the edge of the board
-   * Returns all the value found
-   * 
-   * @param {Array.<Array.<string|null>>} matrix 
-   *  Two-dimension square array in the size of boardSize*boardSize
-   * @param {object} origin 
-   *  {x: int, y: int}
-   * @param {string} direction 
-   *  "R"  : toward right
-   *  "D"  : toward down
-   *  "DR" : toward down & right
-   *  "UR" : toward up   & right
-   * @return {Array.<string|null>}
-   *  Extracted line
-   */
-  scanLine2(matrix, origin, direction) {
-    var cursor = {
-      x: origin.x,
-      y: origin.y
-    };
-    var line = [];
-
-    while (1) {
-      line.push(matrix[cursor.x][cursor.y]);
-
-
-      // If cursor reaches the board edge, return the line so far
-      switch (direction) {
-        case "R":
-          if (cursor.y === this.boardSize - 1) return line;
-          else cursor.y++;
-          break;
-
-        case "D":
-          if (cursor.x === this.boardSize - 1) return line;
-          else cursor.x++;
-          break;
-
-        case "DR":
-          if (cursor.x === this.boardSize - 1 || cursor.y === this.boardSize - 1)
-            return line;
-          else {
-            cursor.x++;
-            cursor.y++;
-          }
-          break;
-
-        case "UR":
-          if (cursor.x === 0 || cursor.y === this.boardSize - 1)
-            return line;
-          else {
-            cursor.x--;
-            cursor.y++;
-          }
-          break;
-
-        default:
-          console.log("Error: unknown direction");
-          return null;
-      }
-    }
-  }
+ 
 
   /**
    * Scan a line in the board
