@@ -3,7 +3,6 @@ import Board from './Board'
 import Brain from './Brain'
 import Control from './Control'
 
-
 export default class Game extends React.Component {
   // "history" format is like:
   //  [
@@ -15,7 +14,7 @@ export default class Game extends React.Component {
     super(props);
     this.boardSize = 15;
     this.winnerChainLength = 5;
-    this.brain = new Brain([], this.boardSize, this.winnerChainLength);
+    this.brain = new Brain(this.boardSize, this.winnerChainLength);
     this.state = {
       history: [
         {
@@ -25,6 +24,7 @@ export default class Game extends React.Component {
       stepNumber: 0,
       xIsNext: false,
       lastMoves: [],
+      winner: null,
     };
   }
 
@@ -52,19 +52,23 @@ export default class Game extends React.Component {
     const squares = [...current.squares];
 
     // Not to change the state and just ignore the click event:
-    //    when winner is determined
-    //    when squares[i] already has value
-    let winner = this.brain.findWinner(squares, i);
-
-    // Return when winner is confirmed, or the cell already has value (O or X)
-    // without setting new value to the cell nor setting new state
-    if (winner || squares[i]) {
+    //    A. when winner is already confirmed 
+    //      (This evaluates if winner is confirmed BEFORE this click event)
+    //    B. when squares[i] already has value
+    if (this.state.winner || squares[i]) {
       return;
     }
 
     // If it's X's turn, fill the clicked cell with X
     // If not, fill with O
     squares[i] = this.state.xIsNext ? "X" : "O";
+
+    let winner = this.brain.findWinner(squares, i);
+    if (winner) {
+      this.setState({
+        winner: winner,
+      })
+    }
 
     this.setState({
       history: history.concat([
@@ -76,6 +80,13 @@ export default class Game extends React.Component {
       xIsNext: !this.state.xIsNext,
       lastMoves: lastMoves.concat(i)
     });
+
+    /** console.log() below fails.
+     * Instead of showing updated state above, this shows old state.
+     * Maybe because setState() is async function
+     *   which executed after even console.log()
+     */
+    // console.log(this.state.stepNumber);
   }
 
   /**
@@ -85,27 +96,21 @@ export default class Game extends React.Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: (step % 2) === 1
+      xIsNext: (step % 2) === 1,
     });
   }
 
   render() {
-
     // Notice that you can write codes inside render() scope before "return(JSX)".
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = this.brain.findWinner(
-      current.squares,
-      this.state.lastMoves[this.state.lastMoves.length - 1]
-    );
+    const lastMove = this.state.lastMoves[this.state.lastMoves.length - 1];
 
-    // console.log(this.state.lastMoves);
-
-
+    /*
     const scenes = history.map((step, scene) => {
       const description = scene ? scene + "手目" : '初期状態';
 
-      // wrapping "ol" is written in render() part
+      // wrapping "ol" is written in return() of render()
       return (
         // "add key to repetitive components" rule
         <li key={scene}>
@@ -113,17 +118,26 @@ export default class Game extends React.Component {
         </li>
       );
     });
+    */
 
     let status;
-    if (winner) {
-      status = winner + "の勝ち！";
-
+    if (this.state.winner) {
+      status = this.state.winner + "の勝ち！";
     } else {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
 
+    if(this.state.stepNumber !== 0){
+      console.log(current);
+      // console.log(lastMove);
+      this.brain.updateScore(current.squares, lastMove, "O");
+      console.log(this.brain.scanLine2(this.brain.returnMatrix(current.squares), {x: 2, y:0}, "R"));
+      // console.log(this.brain.matchPattern([null,null,null,null,null,null,"O", null,null,null,null], "O"));
+      // console.log(this.brain.matchPattern([null,null,"X",null,"O",null,"O", null,null,null,null], "O"));
+    }
 
-    // At this "Game" class level, it's not determined which square was clicked.
+
+    // At this "Game" class level, it's not sepcified which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
     return (
       <div>
@@ -139,7 +153,7 @@ export default class Game extends React.Component {
             <h1>Gomoku</h1>
             <Control />
             <h2>{status}</h2>
-            <ol>{scenes}</ol>
+            {/* <ol>{scenes}</ol> */}
           </div>
         </div>
       </div>

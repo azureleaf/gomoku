@@ -15,12 +15,13 @@
 */
 
 export default class Brain {
-  constructor(squares, boardSize, winnerChainLength) {
+  constructor(boardSize, winnerChainLength) {
     this.boardSize = boardSize;
-    this.matrix = this.returnMatrix(squares);
     this.winnerChainLength = winnerChainLength;
-    this.scoreX = this.returnMatrix(Array(boardSize * boardSize).fill(0));
-    this.scoreO = this.returnMatrix(Array(boardSize * boardSize).fill(0));
+    this.scoreMatrix = {
+      X: this.returnMatrix(Array(boardSize * boardSize).fill(0)),
+      O: this.returnMatrix(Array(boardSize * boardSize).fill(0))
+    }
 
     // in the future, get patterns from the external file
     this.patterns = this.setPatterns();
@@ -60,6 +61,48 @@ export default class Brain {
     // Therefore, put [11010] prior to [10000], [11000], 
     // and when [11010] is matched, abort matching to latter patterns .
     return this.sortPatterns(patterns);
+  }
+
+
+  updateScore(array, lastMove, lastPlayer) {
+
+    // convert 1D array notation into 2D one
+    const matrix = this.returnMatrix(array);
+
+    const row = Math.floor(lastMove / this.boardSize);
+    const col = lastMove % this.boardSize;
+
+    this.matchPattern(
+      this.scanLine(matrix, {
+        x: row,
+        y: 0
+      }, "R"), lastPlayer
+    )
+
+    this.matchPattern(
+      this.scanLine(matrix, {
+        x: 0,
+        y: col
+      }, "D"), lastPlayer
+    )
+
+    this.matchPattern(
+      this.scanLine(matrix, {
+        x: (row - col > 0) ? row - col : 0,
+        y: (row - col > 0) ? 0 : col - row
+      }, "DR"), lastPlayer
+    )
+
+    this.matchPattern(
+      this.scanLine(matrix, {
+        x: (this.boardSize - 1 - row - col > 0) ? row + col : this.boardSize - 1,
+        y: (this.boardSize - 1 - row - col > 0) ? 0 : col - (this.boardSize - 1 - row)
+      }, "UR"), lastPlayer
+    )
+
+    // When winner isn't confirmed
+    return null;
+
   }
 
 
@@ -197,7 +240,7 @@ export default class Brain {
       // Try to match every pattern to the array
       for (let patIndex = 0; patIndex < this.patterns.length; patIndex++) {
         for (let cursorPat = 0; cursorPat < patLen; cursorPat++) {
-          // If discrepancy is found, abort matching to the latter squares, then go to next pattern
+          // If discrepancy is found, abort matching to the remainder, then go to next pattern
           if (arrayIn[cursorIn + cursorPat] !== this.patterns[patIndex].pattern[cursorPat]) {
             break;
           };
@@ -223,9 +266,9 @@ export default class Brain {
    * @return {Array.<Array.<string|null>>}
    */
   returnMatrix(arr) {
-    var matrix = new Array(this.boardSize);
+    var matrix = new Array(this.boardSize).fill(null);
     for (var i = 0; i < this.boardSize; i++) {
-      matrix[i] = new Array(this.boardSize);
+      matrix[i] = new Array(this.boardSize).fill(null);
       for (var j = 0; j < this.boardSize; j++) {
         matrix[i][j] = arr[i * this.boardSize + j];
       }
@@ -262,6 +305,7 @@ export default class Brain {
 
     while (1) {
       line.push(matrix[cursor.x][cursor.y]);
+
 
       // If cursor reaches the board edge, return the line so far
       switch (direction) {
@@ -300,6 +344,75 @@ export default class Brain {
     }
   }
 
+  /**
+   * Scan a line in the board
+   *  from the designated point
+   *  toward the designated direction
+   *  until cursor reaches the edge of the board
+   * Returns all the value found
+   * 
+   * @param {Array.<Array.<string|null>>} matrix 
+   *  Two-dimension square array in the size of boardSize*boardSize
+   * @param {object} origin 
+   *  {x: int, y: int}
+   * @param {string} direction 
+   *  "R"  : toward right
+   *  "D"  : toward down
+   *  "DR" : toward down & right
+   *  "UR" : toward up   & right
+   * @return {Array.<string|null>}
+   *  Extracted line
+   */
+  scanLine2(matrix, origin, direction) {
+    var cursor = {
+      x: origin.x,
+      y: origin.y
+    };
+    var scanResult = [];
+
+    while (1) {
+      scanResult.push({
+        row: cursor.x,
+        col: cursor.y,
+        value: matrix[cursor.x][cursor.y]
+      })
+
+      // If cursor reaches the board edge, return the line so far
+      switch (direction) {
+        case "R":
+          if (cursor.y === this.boardSize - 1) return scanResult;
+          else cursor.y++;
+          break;
+
+        case "D":
+          if (cursor.x === this.boardSize - 1) return scanResult;
+          else cursor.x++;
+          break;
+
+        case "DR":
+          if (cursor.x === this.boardSize - 1 || cursor.y === this.boardSize - 1)
+            return scanResult;
+          else {
+            cursor.x++;
+            cursor.y++;
+          }
+          break;
+
+        case "UR":
+          if (cursor.x === 0 || cursor.y === this.boardSize - 1)
+            return scanResult;
+          else {
+            cursor.x--;
+            cursor.y++;
+          }
+          break;
+
+        default:
+          console.log("Error: unknown direction");
+          return null;
+      }
+    }
+  }
 
   /**
    * 
@@ -312,19 +425,52 @@ export default class Brain {
     // Converts array into 2D matrix for convenience
     const matrix = this.returnMatrix(squares);
 
-    // scanModifiedLines();
-    return this.scanAllLines(matrix);
+    return this.scanModifiedLines(matrix, lastMove);
+    // return this.scanAllLines(matrix);
 
   }
 
-  // scanModifiedLines() {
-  //   const x = Math.floor(lastMove / this.boardSize);
-  //   const y = lastMove % this.boardSize;
+  /**
+   * 
+   * @param {Array.<Array.<string|null>>} matrix 
+   * @param {int} lastMove 
+   */
+  scanModifiedLines(matrix, lastMove) {
+    // convert 1D array notation into 2D one
+    const row = Math.floor(lastMove / this.boardSize);
+    const col = lastMove % this.boardSize;
 
-  //   console.log("point:", x, y);
-  // }
+    let winner = [];
+    winner.push(this.countChain(
+      this.scanLine(matrix, { x: row, y: 0 }, "R")
+    ));
+    winner.push(this.countChain(
+      this.scanLine(matrix, { x: 0, y: col }, "D")
+    ));
+    winner.push(this.countChain(
+      this.scanLine(matrix, {
+        x: (row - col > 0) ? row - col : 0,
+        y: (row - col > 0) ? 0 : col - row
+      }, "DR")
+    ));
+    winner.push(this.countChain(
+      this.scanLine(matrix, {
+        x: (this.boardSize - 1 - row - col > 0) ? row + col : this.boardSize - 1,
+        y: (this.boardSize - 1 - row - col > 0) ? 0 : col - (this.boardSize - 1 - row)
+      }, "UR")
+    ));
+
+    // Check if winner is found or not
+    for (let i = 0; i < winner.length; i++) {
+      if (winner[i]) return winner[i];
+    }
+
+    // When winner isn't confirmed
+    return null;
+  }
 
 
+  /** FUNCTION BELOW IS NOT USED **/
   scanAllLines(matrix) {
     // Results of winner check
     // Each element represents for the check result of a line
