@@ -195,8 +195,8 @@ export default class Brain {
 
   /**
    * 
-   * @param {Array.<string|null>} arrayInRaw 
-   *    This array is going to be tested if it has a matching pattern
+   * @param {Object} scanObj
+   *    array of {row: <int>, col: <int>, value: <str>}
    * @param {string} symbol
    *    "O" or "X"
    *    To determine for which player this function is going to calculate the score
@@ -206,28 +206,28 @@ export default class Brain {
    *      input: ["X", null, null, "O", null, "O", "O", null]
    *      output: [0, 100, 1000, 2100, 0, 0, 1000]
    */
-  matchPattern(arrayInRaw, symbol) {
+  matchPattern(scanObj, symbol) {
     // Sample patterns[0] to get the length of a pattern
     // Requirement: every pattern has the same length.
     const patLen = this.patterns[0].pattern.length;
 
     // When input array is shorter than template patterns, 
     //   no pattern can be matched, therefore abort the process
-    if (arrayInRaw.length < patLen) {
+    if (scanObj.length < patLen) {
       console.log("Error: input array is shorter than template patterns!")
       return null;
     }
 
     // Define temporary array to return
-    let arrayOut = new Array(arrayInRaw.length).fill(0);
+    let arrayOut = new Array(scanObj.length).fill(0);
 
     // Convert array format to the one which is compatible with pattern array
     // 
     // e.g. arrayInRaw = ["X", "X", null, "O"]
     //  When "symbol" is "X", this array turns into [   1,    1, 0, null]
     //  When "symbol" is "O", this array turns into [null, null, 0,    1]
-    let arrayIn = arrayInRaw.map(element => {
-      switch (element) {
+    let arrayIn = scanObj.map(element => {
+      switch (element.value) {
         case symbol: return 1;
         case null: return 0;
         default: return null;
@@ -296,7 +296,7 @@ export default class Brain {
    * @return {Array.<string|null>}
    *  Extracted line
    */
-  scanLine(matrix, origin, direction) {
+  scanLine2(matrix, origin, direction) {
     var cursor = {
       x: origin.x,
       y: origin.y
@@ -363,7 +363,7 @@ export default class Brain {
    * @return {Array.<string|null>}
    *  Extracted line
    */
-  scanLine2(matrix, origin, direction) {
+  scanLine(matrix, origin, direction) {
     var cursor = {
       x: origin.x,
       y: origin.y
@@ -510,15 +510,15 @@ export default class Brain {
     * Returns winner if there's a completed stone chains
     * (In the future, this function will be necessary. Just use matchPattern() function instead)
     * 
-    * @param {Array.<string|null>} sequence 
-    *  Sequence of a line, e.g. ["X", null, "O", "O", null, null, null]
+    * @param {} scanObj 
+    *  
     * @return {string|null} 
     *  If winner is confirmed:
     *    return "O" or "X"
     *  If not:
     *    return null
     */
-  countChain(sequence) {
+  countChain(scanObj) {
 
     // "player" is any of "null", "O", "X"
     var counter = {
@@ -526,8 +526,8 @@ export default class Brain {
       chainLength: 0
     };
 
-    for (var i = 0; i < sequence.length; i++) {
-      if (counter.player === sequence[i]) {
+    for (var i = 0; i < scanObj.length; i++) {
+      if (counter.player === scanObj[i].value) {
         counter.chainLength++;
 
         // chain of "null" is meaningless for the game, then ignore it
@@ -535,7 +535,7 @@ export default class Brain {
           return counter.player;
         }
       } else {
-        counter.player = sequence[i];
+        counter.player = scanObj[i].value;
         counter.chainLength = 1;
       }
     }
