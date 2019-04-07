@@ -17,7 +17,7 @@ export default class Game extends React.Component {
 
     // Balance between "Make move to win" or "Make move to disturb opponent"
     // The more aggressiveness, the less com player's disturbing to opponent
-    this.aggressiveness = 3;
+    this.aggressiveness = 2;
     
     this.brain = new Brain(this.boardSize, this.winnerChainLength, this.aggressiveness);
     this.state = {
@@ -145,6 +145,7 @@ export default class Game extends React.Component {
             <h1>Gomoku</h1>
             <Control />
             <h2>{status}</h2>
+            <div>{this.state.stepNumber + 1}手目</div>
           </div>
         </div>
       </div>

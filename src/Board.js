@@ -47,7 +47,7 @@ export default class Board extends React.Component {
 
     return (
       <div>
-        {rows.map(row => <div key={row.toString()}>{this.renderRow(row)}</div>)}
+        {rows.map(row => <div key={row[0].toString()}>{this.renderRow(row)}</div>)}
       </div>
     )
   }

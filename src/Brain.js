@@ -58,7 +58,7 @@ export default class Brain {
 
     // Sort patterns to avoid unnecessary matching
     // e.g.
-    // When [11010] matches, trying [10000], [11000] is redundant
+    // When [11010] matches, furtherly matching [10000], [11000] is redundant
     // Therefore, put [11010] prior to [10000], [11000], 
     // and when [11010] is matched, abort matching to latter patterns .
     return this.sortPatterns(patterns);
