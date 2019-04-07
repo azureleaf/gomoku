@@ -15,12 +15,13 @@
 */
 
 export default class Brain {
-  constructor(boardSize, winnerChainLength) {
+  constructor(boardSize, winnerChainLength, aggressivness) {
     this.boardSize = boardSize;
     this.winnerChainLength = winnerChainLength;
+    this.aggressivness = aggressivness;
     this.scoreMatrix = {
-      X: this.returnMatrix(Array(boardSize * boardSize).fill(0)),
-      O: this.returnMatrix(Array(boardSize * boardSize).fill(0))
+      playerX: this.returnMatrix(Array(boardSize * boardSize).fill(0)),
+      playerO: this.returnMatrix(Array(boardSize * boardSize).fill(0))
     }
 
     // in the future, get patterns from the external file
@@ -33,7 +34,7 @@ export default class Brain {
    * 
    *  @return {Array.<Object>}
    *    Patterns list. Each row represents for a pattern.
-   *    e.g.
+   *    example:
    *      [
    *        {pattern: [0,0,1,0,1], score: [100,100,0,100,0], max: 100},
    *        {pattern: [0,1,1,1,0], score: [1000,0,0,0,1000], max: 1000},
@@ -63,7 +64,85 @@ export default class Brain {
     return this.sortPatterns(patterns);
   }
 
+  /**
+   * Returns the score matrix of the entire board for a player
+   * 
+   * @param {Array.<str|null>} array 
+   * @param {str} nextPlayer 
+   */
+  calculateScore(array, nextPlayer) {
 
+    const prevPlayer = (nextPlayer === "X") ? "O" : "X";
+
+    // convert 1D array into 2D one
+    const matrix = this.returnMatrix(array);
+
+    // Score matrix for both players
+    let scoreMatrix = {
+      O: this.returnScoreMatrix(matrix, "O"),
+      X: this.returnScoreMatrix(matrix, "X")
+    }
+
+    // Object to return
+    let nextMove = {
+      next: nextPlayer,
+      row: null,
+      col: null,
+      score: 0
+    }
+
+
+    // Find the square with the highest score
+    for (let i = 0; i < this.boardSize; i++) {
+      for (let j = 0; j < this.boardSize; j++) {
+        var combineScore =
+          this.aggressivness * scoreMatrix[nextPlayer][i][j]
+          + scoreMatrix[prevPlayer][i][j];
+        if (combineScore > nextMove.score) {
+          nextMove.row = i;
+          nextMove.col = j;
+          nextMove.score = combineScore;
+        }
+      }
+    }
+    return nextMove;
+  }
+
+  returnScoreMatrix(matrix, player) {
+    let scoreMatrix = this.returnMatrix(Array(this.boardSize * this.boardSize).fill(0));
+
+    let results = [];
+
+    for (let i = 0; i < this.boardSize; i++) {
+
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: i, y: 0 }, "R"), player))
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: 0, y: i }, "D"), player))
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: i, y: 0 }, "DR"), player))
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: 0, y: i }, "DR"), player))
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: i, y: 0 }, "UR"), player))
+      results = results.concat(
+        this.matchPattern(
+          this.scanLine(matrix, { x: this.boardSize - 1, y: i }, "UR"), player))
+    }
+
+    for (let i = 0; i < results.length; i++) {
+      scoreMatrix[results[i].row][results[i].col] += results[i].score;
+    }
+    return scoreMatrix;
+  }
+
+
+  // NOT USED
   updateScore(array, lastMove, lastPlayer) {
 
     // convert 1D array notation into 2D one
@@ -71,38 +150,56 @@ export default class Brain {
 
     const row = Math.floor(lastMove / this.boardSize);
     const col = lastMove % this.boardSize;
+    let newScore = [];
 
-    this.matchPattern(
+    newScore = newScore.concat(this.matchPattern(
       this.scanLine(matrix, {
         x: row,
         y: 0
       }, "R"), lastPlayer
-    )
+    ))
 
-    this.matchPattern(
+    newScore = newScore.concat(this.matchPattern(
       this.scanLine(matrix, {
         x: 0,
         y: col
       }, "D"), lastPlayer
-    )
+    ))
 
-    this.matchPattern(
+    newScore = newScore.concat(this.matchPattern(
       this.scanLine(matrix, {
         x: (row - col > 0) ? row - col : 0,
         y: (row - col > 0) ? 0 : col - row
       }, "DR"), lastPlayer
-    )
+    ))
 
-    this.matchPattern(
+    newScore = newScore.concat(this.matchPattern(
       this.scanLine(matrix, {
         x: (this.boardSize - 1 - row - col > 0) ? row + col : this.boardSize - 1,
         y: (this.boardSize - 1 - row - col > 0) ? 0 : col - (this.boardSize - 1 - row)
       }, "UR"), lastPlayer
-    )
+    ))
 
-    // When winner isn't confirmed
-    return null;
+    newScore = newScore.concat(this.matchPattern(
+      this.scanLine(matrix, {
+        x: (this.boardSize - 1 - row - col > 0) ? row + col : this.boardSize - 1,
+        y: (this.boardSize - 1 - row - col > 0) ? 0 : col - (this.boardSize - 1 - row)
+      }, "UR"), lastPlayer
+    ))
 
+    for (let i = 0; i < newScore.length; i++) {
+      switch (lastPlayer) {
+        case "O":
+          this.scoreMatrix.playerO[newScore[i].row][newScore[i].col] = newScore[i].score;
+          break;
+        case "X":
+          this.scoreMatrix.playerX[newScore[i].row][newScore[i].col] = newScore[i].score;
+          break;
+        default:
+          console.log("Error: Unknown player symbol: ", lastPlayer);
+          break;
+      }
+    }
   }
 
 
@@ -131,7 +228,7 @@ export default class Brain {
     for (let i = 0; i < array.length; i++) {
       if (array[i] === 0) array[i] = Math.pow(10, stoneCounter);
       else if (array[i] === 1) array[i] = 0;
-      else console.log("Error: unknown symbol in the pattern!");
+      else console.log("Error: unknown symbol in the pattern: ", array[i]);
     }
     return array;
   }
@@ -210,57 +307,67 @@ export default class Brain {
     // Sample patterns[0] to get the length of a pattern
     const patLen = this.patterns[0].pattern.length;
 
+
+    let scoreObj = [];
+
     // When input array is shorter than template patterns, 
-    //   no pattern can be matched, therefore abort the process
-    if (scanObj.length < patLen) {
-      console.log("Error: input array is shorter than template patterns!")
-      return null;
-    }
+    //   no pattern will be matched, therefore abort the process
+    if (scanObj.length < patLen) return scoreObj;
+
 
     // Real copy of object array
-    let scoreObj = scanObj.map(obj => {return Object.assign({}, obj)});
+    // let scoreObj = scanObj.map(obj => { return Object.assign({}, obj) });
+    // console.log(scoreObj);
 
-   
-    console.log(scoreObj);
-
-    // Define temporary array to return
-    let arrayOut = new Array(scanObj.length).fill(0);
 
     // Convert array format to the one which is compatible with pattern array
     // 
     // e.g. arrayInRaw = ["X", "X", null, "O"]
     //  When "symbol" is "X", this array turns into [   1,    1, 0, null]
     //  When "symbol" is "O", this array turns into [null, null, 0,    1]
-    let arrayIn = scanObj.map(element => {
-      switch (element.value) {
-        case symbol: return 1;
-        case null: return 0;
-        default: return null;
+
+
+    for (let i = 0; i < scanObj.length; i++) {
+
+      // convert format
+      switch (scanObj[i].value) {
+        case symbol: scanObj[i].value = 1; break;
+        case null: scanObj[i].value = 0; break;
+        default: scanObj[i].value = null; break;
       }
-    })
+
+      // make scoreObj
+      scoreObj.push({
+        row: scanObj[i].row,
+        col: scanObj[i].col,
+        score: 0
+      })
+    }
+
 
     // Move the start position of matching one by one
     // "cursor" moves inside input array
-    for (let cursorIn = 0; cursorIn < arrayIn.length - this.winnerChainLength + 1; cursorIn++) {
+    for (let cursorObj = 0; cursorObj < scanObj.length - this.winnerChainLength + 1; cursorObj++) {
       // Try to match every pattern to the array
       for (let patIndex = 0; patIndex < this.patterns.length; patIndex++) {
         for (let cursorPat = 0; cursorPat < patLen; cursorPat++) {
           // If discrepancy is found, abort matching to the remainder, then go to next pattern
-          if (arrayIn[cursorIn + cursorPat] !== this.patterns[patIndex].pattern[cursorPat]) {
-            break;
-          };
+          if (scanObj[cursorObj + cursorPat].value !== this.patterns[patIndex].pattern[cursorPat]) break;
+
           // If reached the last cell of a pattern array
           if (cursorPat === patLen - 1) {
-            // console.log("Matched: " + this.patterns[patIndex].pattern + " at position of " + cursorIn);
-            for (let i = 0; i < arrayOut.length; i++) {
+
+            for (let i = 0; i < scoreObj.length; i++) {
+              // If that cell is blank, set score
               if (this.patterns[patIndex].pattern[i] === 0)
-                arrayOut[cursorIn + i] += this.patterns[patIndex].score[i];
+                scoreObj[cursorObj + i].score += this.patterns[patIndex].score[i];
             }
           }
         }
       }
     }
-    return arrayOut;
+
+    return scoreObj;
   }
 
 
@@ -282,7 +389,7 @@ export default class Brain {
   }
 
 
- 
+
 
   /**
    * Scan a line in the board
@@ -348,7 +455,7 @@ export default class Brain {
           break;
 
         default:
-          console.log("Error: unknown direction");
+          console.log("Error: unknown direction: ", direction);
           return null;
       }
     }

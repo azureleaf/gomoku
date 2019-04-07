@@ -14,7 +14,12 @@ export default class Game extends React.Component {
     super(props);
     this.boardSize = 15;
     this.winnerChainLength = 5;
-    this.brain = new Brain(this.boardSize, this.winnerChainLength);
+
+    // Balance between "Make move to win" or "Make move to disturb opponent"
+    // The more aggressiveness, the less com player's disturbing to opponent
+    this.aggressiveness = 3;
+    
+    this.brain = new Brain(this.boardSize, this.winnerChainLength, this.aggressiveness);
     this.state = {
       history: [
         {
@@ -23,8 +28,10 @@ export default class Game extends React.Component {
       ],
       stepNumber: 0,
       xIsNext: false,
-      lastMoves: [],
       winner: null,
+      lastMoves: [],
+      oIsCom: false,
+      xIsCom: true
     };
   }
 
@@ -64,11 +71,6 @@ export default class Game extends React.Component {
     squares[i] = this.state.xIsNext ? "X" : "O";
 
     let winner = this.brain.findWinner(squares, i);
-    if (winner) {
-      this.setState({
-        winner: winner,
-      })
-    }
 
     this.setState({
       history: history.concat([
@@ -78,12 +80,19 @@ export default class Game extends React.Component {
       ]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
-      lastMoves: lastMoves.concat(i)
-    });
+      lastMoves: lastMoves.concat(i),
+      winner: winner? winner: null,
+    },
+      () => {
+        // callback function (Run after setState())
+        if(this.state.xIsNext)
+          this.computerMove(this.state.history[this.state.history.length - 1].squares, "X")
+      }
+    );
 
     /** console.log() below fails.
      * Instead of showing updated state above, this shows old state.
-     * Maybe because setState() is async function
+     * Because setState() is async function
      *   which executed after even console.log()
      */
     // console.log(this.state.stepNumber);
@@ -100,25 +109,18 @@ export default class Game extends React.Component {
     });
   }
 
+
+  computerMove(squares, nextPlayer) {
+    const nextMove = this.brain.calculateScore(squares, nextPlayer);
+    if(nextPlayer === "X"){
+      this.handleClick(nextMove.row * this.boardSize + nextMove.col);
+    }
+  }
+
   render() {
     // Notice that you can write codes inside render() scope before "return(JSX)".
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const lastMove = this.state.lastMoves[this.state.lastMoves.length - 1];
-
-    /*
-    const scenes = history.map((step, scene) => {
-      const description = scene ? scene + "手目" : '初期状態';
-
-      // wrapping "ol" is written in return() of render()
-      return (
-        // "add key to repetitive components" rule
-        <li key={scene}>
-          <button onClick={() => this.jumpTo(scene)}>{description}</button>
-        </li>
-      );
-    });
-    */
 
     let status;
     if (this.state.winner) {
@@ -126,11 +128,6 @@ export default class Game extends React.Component {
     } else {
       status = "手番: " + (this.state.xIsNext ? "X" : "O");
     }
-
-    if(this.state.stepNumber !== 0){
-      this.brain.updateScore(current.squares, lastMove, "O");
-    }
-
 
     // At this "Game" class level, it's not sepcified which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
@@ -148,7 +145,6 @@ export default class Game extends React.Component {
             <h1>Gomoku</h1>
             <Control />
             <h2>{status}</h2>
-            {/* <ol>{scenes}</ol> */}
           </div>
         </div>
       </div>
