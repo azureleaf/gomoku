@@ -1,5 +1,6 @@
 import React from 'react'
-// import {Button, ButtonToolbar, Form} from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
 
 export default class Control extends React.Component {
@@ -23,8 +24,14 @@ export default class Control extends React.Component {
   render() {
     return (
 
-      <div className="radioButton">
-        {/* <form>
+      <div className="settingControl">
+        <ButtonGroup aria-label="Board control">
+          <Button variant="primary" type="submit" value="Submit" >一手前</Button>
+          <Button variant="primary" type="submit" value="Submit" >一手先</Button>
+        </ButtonGroup>
+
+        <div className="settings alert alert-light">
+          {/* <form>
 
           先手:
           <label>
@@ -68,16 +75,14 @@ export default class Control extends React.Component {
             />Com
           </label>
         </form> */}
-        {/* <form>
+          {/* <form>
           <div>
             候補手評価値表示：<input type="checkbox" id="myCheck" onClick=""></input>
           </div>
         </form> */}
-        <form>
-          <div>
-            <button type="submit" value="SaveSetting">設定保存</button>
-          </div>
-        </form>
+          <Button variant="danger" type="submit" value="Submit" >新規</Button>
+
+        </div>
       </div>
     )
   }

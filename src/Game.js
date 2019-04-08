@@ -1,7 +1,9 @@
 import React from 'react';
-import Board from './Board'
-import Brain from './Brain'
-import Control from './Control'
+import Board from './Board';
+import Brain from './Brain';
+import Control from './Control';
+import Table from 'react-bootstrap/Table';
+
 
 export default class Game extends React.Component {
   // "history" format is like:
@@ -126,26 +128,56 @@ export default class Game extends React.Component {
     if (this.state.winner) {
       status = this.state.winner + "の勝ち！";
     } else {
-      status = "手番: " + (this.state.xIsNext ? "X" : "O");
+      status = (this.state.xIsNext ? "X" : "O") + "の番です";
     }
 
     // At this "Game" class level, it's not sepcified which square was clicked.
     // Click on anywhere in Board DOM element triggers event handler
     return (
-      <div>
-        <div className="game">
-          <div className="game-board">
+      <div className="container">
+        <div className="game col-10">
+          <div className="game-board col-9">
             <Board
               boardSize={this.boardSize}
               squares={current.squares}
               onClick={i => this.handleClick(i)}
             />
           </div>
-          <div className="game-info">
+          <div className="game-info col-3">
             <h1>Gomoku</h1>
+            
+            <Table striped bordered hover>
+              <tbody className="gameStatus">
+                <tr>
+                  <td>手番</td>
+                  <td>{status}</td>
+                </tr>
+                <tr>
+                  <td>手数</td>
+                  <td>{this.state.stepNumber + 1}手目</td>
+                </tr>
+                <tr>
+                  <td>O</td>
+                  <td>
+                    人間<br/>
+                    ?連勝中<br/>
+                    勝率?%
+                  </td>
+                </tr>
+                <tr>
+                  
+                  <td>X</td>
+                  <td>
+                    計算機<br/>
+                    ?連勝中<br/>
+                    勝率?%
+                  </td>
+                </tr>
+                
+                
+              </tbody>
+            </Table>
             <Control />
-            <h2>{status}</h2>
-            <div>{this.state.stepNumber + 1}手目</div>
           </div>
         </div>
       </div>

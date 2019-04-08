@@ -1,5 +1,5 @@
 body {
-  font: 14px "Noto Sans JP", "Kosugi Maru", "Century Gothic", Futura, sans-serif;
+  font: 14px "Noto Sans JP", "Century Gothic", Futura, sans-serif;
   margin: 20px;
 }
 
@@ -49,14 +49,25 @@ ol, ul {
 
 .game-info {
   margin-left: 20px;
-}
-
-h1, h2{
-  font-weight: bold;
+  text-align: center;
 }
 
 h1{
+  font-weight: bold;
+  padding: 20px 0;
   text-align: center;
   font-family: "Pacifico", cursive;
   font-weight: bold;
+}
+
+.settings{
+  border: solid 1px #aaa;
+}
+
+.gameStatus{
+  font-weight: bold;
+}
+
+.game-board{
+  margin: 20px 0;
 }

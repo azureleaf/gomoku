@@ -65,7 +65,7 @@ export default class Brain {
   }
 
   /**
-   * Returns the score matrix of the entire board for a player
+   * Returns next move information judged from the current board
    * 
    * @param {Array.<str|null>} array 
    * @param {str} nextPlayer 
@@ -74,7 +74,7 @@ export default class Brain {
 
     const prevPlayer = (nextPlayer === "X") ? "O" : "X";
 
-    // convert 1D array into 2D one
+    // convert 1D array into 2D 
     const matrix = this.returnMatrix(array);
 
     // Score matrix for both players
@@ -91,12 +91,11 @@ export default class Brain {
       score: 0
     }
 
-
     // Find the square with the highest score
     for (let i = 0; i < this.boardSize; i++) {
       for (let j = 0; j < this.boardSize; j++) {
         var combineScore =
-          this.aggressivness * scoreMatrix[nextPlayer][i][j]
+          scoreMatrix[nextPlayer][i][j] * this.aggressivness
           + scoreMatrix[prevPlayer][i][j];
         if (combineScore > nextMove.score) {
           nextMove.row = i;
@@ -143,6 +142,13 @@ export default class Brain {
 
 
   // NOT USED
+  /**
+   * 
+   * @param {Array.<>} array 
+   * @param {int} lastMove 
+   *  Position of square
+   * @param {str} lastPlayer 
+   */
   updateScore(array, lastMove, lastPlayer) {
 
     // convert 1D array notation into 2D one
