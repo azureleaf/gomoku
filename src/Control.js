@@ -26,8 +26,8 @@ export default class Control extends React.Component {
 
       <div className="settingControl">
         <ButtonGroup aria-label="Board control">
-          <Button variant="primary" type="submit" value="Submit" >一手前</Button>
-          <Button variant="primary" type="submit" value="Submit" >一手先</Button>
+          <Button variant="primary" type="submit" value="Submit" >一手戻る</Button>
+          <Button variant="primary" type="submit" value="Submit" >一手進む</Button>
         </ButtonGroup>
 
         <div className="settings alert alert-light">

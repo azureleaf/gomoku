@@ -135,7 +135,7 @@ export default class Game extends React.Component {
     // Click on anywhere in Board DOM element triggers event handler
     return (
       <div className="container">
-        <div className="game col-10">
+        <div className="game col-12">
           <div className="game-board col-9">
             <Board
               boardSize={this.boardSize}
