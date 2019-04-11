@@ -20,7 +20,7 @@ export default class Game extends React.Component {
     // Balance between "Make move to win" or "Make move to disturb opponent"
     // The more aggressiveness, the less com player's disturbing to opponent
     this.aggressiveness = 2;
-    
+
     this.brain = new Brain(this.boardSize, this.winnerChainLength, this.aggressiveness);
     this.state = {
       history: [
@@ -83,17 +83,18 @@ export default class Game extends React.Component {
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
       lastMoves: lastMoves.concat(i),
-      winner: winner? winner: null,
+      winner: winner ? winner : null,
     },
       () => {
         // callback function (Run after setState())
-        if(this.state.xIsNext)
+        if (this.state.xIsNext)
           this.computerMove(this.state.history[this.state.history.length - 1].squares, "X")
       }
     );
 
     /** console.log() below fails.
-     * Instead of showing updated state above, this shows old state.
+     * Though this part is written after setState(),
+     * instead of showing updated state above, this just shows old state.
      * Because setState() is async function
      *   which executed after even console.log()
      */
@@ -114,9 +115,15 @@ export default class Game extends React.Component {
 
   computerMove(squares, nextPlayer) {
     const nextMove = this.brain.calculateScore(squares, nextPlayer);
-    if(nextPlayer === "X"){
-      this.handleClick(nextMove.row * this.boardSize + nextMove.col);
+
+    if (nextMove.score === 0) {
+      this.setState({
+        winner: "draw"
+      })
+      alert("引き分けです！");
     }
+
+    this.handleClick(nextMove.row * this.boardSize + nextMove.col);
   }
 
   render() {
@@ -125,7 +132,9 @@ export default class Game extends React.Component {
     const current = history[this.state.stepNumber];
 
     let status;
-    if (this.state.winner) {
+    if (this.state.winner === "draw") {
+      status = "引き分け！"
+    } else if (this.state.winner) {
       status = this.state.winner + "の勝ち！";
     } else {
       status = (this.state.xIsNext ? "X" : "O") + "の番です";
@@ -145,7 +154,7 @@ export default class Game extends React.Component {
           </div>
           <div className="game-info col-3">
             <h1>Gomoku</h1>
-            
+
             <Table striped bordered hover>
               <tbody className="gameStatus">
                 <tr>
@@ -159,22 +168,22 @@ export default class Game extends React.Component {
                 <tr>
                   <td>O</td>
                   <td>
-                    人間<br/>
-                    ?連勝中<br/>
+                    人間<br />
+                    ?連勝中<br />
                     勝率?%
                   </td>
                 </tr>
                 <tr>
-                  
+
                   <td>X</td>
                   <td>
-                    計算機<br/>
-                    ?連勝中<br/>
+                    計算機<br />
+                    ?連勝中<br />
                     勝率?%
                   </td>
                 </tr>
-                
-                
+
+
               </tbody>
             </Table>
             <Control />

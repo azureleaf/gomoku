@@ -42,7 +42,12 @@ export default class Brain {
    *      ]
    */
   setPatterns() {
+
+    // Set the number of patterns here. 
+    // e.g. When player needs 3 stone chains to win, there're 2*2*2 = 8 pattern varieties.
     let patterns = new Array(Math.pow(2, this.winnerChainLength)).fill(null);
+
+
     for (let i = 0; i < patterns.length; i++) {
       let patternArr = this.returnBinaryArray(i, this.winnerChainLength);
       let scoreArr = this.returnScoreArray([...patternArr]);
@@ -107,6 +112,7 @@ export default class Brain {
         }
       }
     }
+    
     return nextMove;
   }
 
