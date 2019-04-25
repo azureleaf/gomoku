@@ -1,9 +1,8 @@
 import React from 'react';
 import Board from './Board';
 import Brain from './Brain';
-import Control from './Control';
 import Table from 'react-bootstrap/Table';
-
+// import Control from './Control';
 
 export default class Game extends React.Component {
   // "history" format is like:
@@ -19,7 +18,7 @@ export default class Game extends React.Component {
 
     // Balance between "Make move to win" or "Make move to disturb opponent"
     // The more aggressiveness, the less com player's disturbing to opponent
-    this.aggressiveness = 2;
+    this.aggressiveness = 1.9;
 
     this.brain = new Brain(this.boardSize, this.winnerChainLength, this.aggressiveness);
     this.state = {
@@ -165,7 +164,7 @@ export default class Game extends React.Component {
                   <td>手数</td>
                   <td>{this.state.stepNumber + 1}手目</td>
                 </tr>
-                <tr>
+                {/* <tr>
                   <td>O</td>
                   <td>
                     人間<br />
@@ -181,12 +180,10 @@ export default class Game extends React.Component {
                     ?連勝中<br />
                     勝率?%
                   </td>
-                </tr>
-
-
+                </tr> */}
               </tbody>
             </Table>
-            <Control />
+            {/* <Control /> */}
           </div>
         </div>
       </div>

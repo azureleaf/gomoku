@@ -12,7 +12,7 @@ export default class Control extends React.Component {
     }
   }
 
-  // THIS PART IS NOT COMPLETED AT ALL
+  // THIS PART IS NOT COMPLETED
   handleClick() {
     this.setState({
       isComFirst: !this.state.isComFirst

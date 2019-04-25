@@ -1,7 +1,6 @@
 import React from 'react';
 import Square from './Square'
 
-
 /**
  *  
  *  Instantiated by : Game object
@@ -33,6 +32,7 @@ export default class Board extends React.Component {
   /**
    * 
    * @param {int} boardSize 
+   * @return {JSX}
    */
   renderRows(boardSize) {
 
