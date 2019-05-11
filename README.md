@@ -1,68 +1,52 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+五目並べ
+====
 
-## Available Scripts
+ブラウザで動く五目並べです。人間側がマスをクリックして入力すると、COM側が最善手を計算して返します。
 
-In the project directory, you can run:
+## Description
 
-### `npm start`
+Reactで動いています。COM側は次の手順で盤面評価値を計算します。
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. ゲーム開始時に、すべてのマッチングパターンを生成する。
+    - 五目並べなら、`2*2*2*2*2 = 32`通り考えられる
+1. 各パターンの空白マスにスコアを与える。
+    - 五目並べで石が4つ揃っているパターンなら、その空白マスに10000点。3つ揃ってるパターンなら、1000点...という具合
+1. 人間側が手を指して盤面が変化するたびに、Game ClassからBrain Classに盤面情報を投げる。
+1. Brain Classでは、すべてのライン（縦、横、斜め）のすべての位置について上記のパターンマッチングを試みる。
+1. マッチしたならば、各セルのスコアをスコア行列に加える。すべてのラインを計算したあとにスコア行列の中でスコアが最高の地点を最善手とする。
+1. このスコア行列は、「O（人間側）にとってのスコア行列」「X（COM側）にとってのスコア行列」の２種類を考える必要がある。
+    - 「人間側の最善手」の場所にコンピュータが石を置けば、人間側を妨害できる。（敵の打ちたいところに打て）
+1. 「COM側にとっての最善手」に一定の係数を掛けた上で、「人間側にとってのスコア行列」に加算する。この合算スコア行列の中で値が最高の地点にCOM側は石を置く。
+    - これにより、人間側のスコアが高い場合（石が４つ並んでおり王手のときなど）のみCOM側が人間側を妨害する手を選択するようになるはず。
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+![評価方法の例](how_scoring_works.jpg)
 
-### `npm test`
+盤面の中に上記のようなラインがあったとして、これにパターンマッチングをすると、A, B, C, Dの４パターンがマッチする。パターン配列の空白の部分には固定でスコアを割り振っているので、これら４パターンについてスコアを合算する。多くのパターンがマッチする空白セル、完成に近い箇所の空白セルほどスコアが高くなる。
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Usage
 
-### `npm run build`
+`npm start`後にブラウザを開けば動きます。
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Requirements
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+`package.json`を参照
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Todo 
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+- 見た目があまりに地味なので、アニメーションをつける
+- 最後に指した手を別の色で表示する
+- COM側の強さを選べるようにする
+- プレイを記録し、サーバー等に保存する（特にCOM側が負けた場合のデータが重要）
+- 人間側が「待った」を使えるようにする
+- スコアのつけ方を改善する：今は総当たりだが、機械学習などで改善の余地がある。
+    - 現在は各パターン内部の各空白セルのスコアに適当な固定値を割り振っているが、これが最良だとは思えない。（スコア100点ではなく95点の方が良い、とか）
+    - COM側の意図が人間側プレイヤーにバレると、その手は人間側につぶされてしまう。「人間側から見て気付きにくい石の置き方」があるはずだが、現状ではこれを学習していく術がない
+    - 「指した手がCOM側の勝利に結びついたかどうか」を教師データとして、パターンのスコア値を増減させることができるか？
+    - 場面全体を画像のようにCNNに投げれば学習できることができるのか？
+        - 深層学習といえどもそこまで賢くはなさそうだが・・・
+- 好戦度（自分の手を作るのを優先するか、人間側を邪魔するのを優先するのか）の計算方法がよくない
+    - 現時点では単純に両者のスコアを足しているが、人間側が王手なのにCOM側がそれを無視し自分の手を優先させてしまったために敗北する時がある。単純に加算するのではなく、両者のスコア行列の最大値同士を比較すべきかもしれない。
+- Brain.jsのコードが長すぎるし見にくすぎて地獄のようになっている
+    - 十分にオブジェクト指向的ではない。クラス分割、ファイル分割、関数分割すべき
+- 盤面評価値の計算方法は我流で考えた原始的なものなので、もっとうまい方法もあるはず
+    - 将棋の評価関数計算方法とかを勉強したほうがいいかも？

@@ -32,10 +32,10 @@ export default class Brain {
    *      ]
    */
   setPatterns() {
-
     // Set the number of patterns here. 
     // e.g. 
-    //  When player needs 3 stone chains to win, there're 2*2*2 = 8 pattern varieties
+    //    When player needs 3 stone chains to win, 
+    //    there're 2*2*2 = 8 pattern varieties
     let patterns = new Array(Math.pow(2, this.winnerChainLength)).fill(null);
 
     for (let i = 0; i < patterns.length; i++) {
@@ -56,17 +56,20 @@ export default class Brain {
 
     // Sort patterns to avoid unnecessary matching
     // e.g.
-    // When [11010] matches, furtherly matching [10000], [11000] is redundant
+    // When [11010] matches, furtherly matching [10000], [11000] is redundant,
+    // because they always matches in that case.
     // Therefore, put [11010] prior to [10000], [11000], 
-    // and when [11010] is matched, abort matching to latter patterns .    
+    // and when [11010] is matched, abort matching to latter patterns.    
     return this.sortPatterns(patterns);
   }
+
 
   /**
    * Returns next move information judged from the current board
    * 
    * @param {Array.<str|null>} array 
    * @param {str} nextPlayer 
+   * @return {Object}
    */
   calculateScore(array, nextPlayer) {
 
@@ -89,7 +92,7 @@ export default class Brain {
       score: 0
     }
 
-    // Find the square with the highest score in the whole board
+    // Find which square has the highest score in the board
     for (let i = 0; i < this.boardSize; i++) {
       for (let j = 0; j < this.boardSize; j++) {
         var combineScore =
@@ -106,6 +109,13 @@ export default class Brain {
     return nextMove;
   }
 
+
+  /**
+   * Return matrix of scores, for each square in the board
+   * @param {*} matrix 
+   * @param {*} player 
+   * @return {Array.<>}
+   */
   returnScoreMatrix(matrix, player) {
     // Define the board which has the same size as a board
     // and give a score to the every square in the board
@@ -152,7 +162,8 @@ export default class Brain {
   // NOT USED FOR NOW: FOR FUTURE FEATURE
   // TO AVOID THE UNNECESSARY CALCULATION AND FOLLOWING SLOW WEBSITE PERFOMARNCE
   /**
-   * Update the part of score matrix only which is affected by the last move
+   * Update the some squares of score matrix only
+   * which are affected by the last move
    * 
    * @param {Array.<>} array 
    * @param {int} lastMove 
@@ -165,7 +176,7 @@ export default class Brain {
     // Convert the board: from 1D array notation into 2D one
     const matrix = this.returnMatrix(array);
 
-    // Convert the lastMove index: from 1D notation to 2D one
+    // Convert the index of the last move: from 1D notation to 2D one
     const row = Math.floor(lastMove / this.boardSize);
     const col = lastMove % this.boardSize;
     
@@ -256,6 +267,9 @@ export default class Brain {
    * Sort patterns by the value of key "max"
    * 
    * @param {Array.<Object>} array
+   *    Each elemental object in this array must have the key "max"
+   * @return {Array.<Object>} 
+   *    Array sorted by "max" key
    */
   sortPatterns(array) {
     return array.sort((a, b) => { return b.max - a.max; });
@@ -296,6 +310,7 @@ export default class Brain {
    * Get a array of numbers, return the largest value in it
    * 
    * @param {Array.<int>} array 
+   * @return {int}
    */
   getMax(array) {
     let max = 0;
@@ -309,7 +324,7 @@ export default class Brain {
   /**
    * 
    * @param {Object} scanObj
-   *    array of dictionary {row: <int>, col: <int>, value: <str|null>}
+   *    array of dictionary: {row: <int>, col: <int>, value: <str|null>}
    *    a dictionary represents for a square (position & its value)
    * @param {string} symbol
    *    "O" or "X"
@@ -322,7 +337,7 @@ export default class Brain {
    */
   matchPattern(scanObj, symbol) {
 
-    // Sample patterns[0] to get the length of a pattern
+    // Sampling patterns[0] to get the length of a pattern
     const patLen = this.patterns[0].pattern.length;
 
     let scoreObj = [];
@@ -475,6 +490,7 @@ export default class Brain {
     }
   }
 
+
   /**
    * NOT USED FOR NOW
    * Get board information, then will return winner if found
@@ -493,6 +509,7 @@ export default class Brain {
 
   }
 
+
   /**
    * Get board information, returns the winner if found
    * 
@@ -505,7 +522,10 @@ export default class Brain {
     const row = Math.floor(lastMove / this.boardSize);
     const col = lastMove % this.boardSize;
 
+    // Array to store the result of winner search
+    // 
     let winner = [];
+
     winner.push(this.countChain(
       this.scanLine(matrix, { x: row, y: 0 }, "R")
     ));
@@ -535,7 +555,12 @@ export default class Brain {
   }
 
 
-  /** FUNCTION BELOW IS NOT USED (BECAUSE IT'S WASTEFUL)**/
+  /** FUNCTION BELOW IS NOT USED (BECAUSE OF LOW PERFORMANCE)**/
+ /**
+  * 
+  * @param {Array.<Array.<str|null>>} matrix 
+  * @return {str|null}
+  */ 
   scanAllLines(matrix) {
     // Results of winner check
     // Each element represents for the check result of a line
@@ -570,10 +595,9 @@ export default class Brain {
     return null;
   }
 
+
   /**
     * Get a single line data, returns winner if there's a completed stone chains
-    * (In the future, this function will be necessary.
-    *    Just use matchPattern() function instead)
     * 
     * @param {Object} scanObj 
     *   array of dictionary {row: <int>, col: <int>, value: <str|null>}
@@ -583,6 +607,9 @@ export default class Brain {
     *    return "O" or "X"
     *  If not:
     *    return null
+    * 
+    *   (In the future, this function will be necessary.
+    *    Just use matchPattern() function instead)
     */
   countChain(scanObj) {
 

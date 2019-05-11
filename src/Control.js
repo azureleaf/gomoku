@@ -18,6 +18,7 @@ export default class Control extends React.Component {
       isComFirst: !this.state.isComFirst
     });
 
+    // TEST
     console.log("clicked!");
   }
 
@@ -81,7 +82,6 @@ export default class Control extends React.Component {
           </div>
         </form> */}
           <Button variant="danger" type="submit" value="Submit" >新規</Button>
-
         </div>
       </div>
     )
